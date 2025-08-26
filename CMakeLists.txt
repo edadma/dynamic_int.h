@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(dynamic_bigint 
+project(dynamic_int 
     VERSION 0.1.0
     DESCRIPTION "Reference-counted arbitrary precision integer library"
     LANGUAGES C)
@@ -19,8 +19,8 @@ else()
 endif()
 
 # Header-only library target
-add_library(dynamic_bigint INTERFACE)
-target_include_directories(dynamic_bigint INTERFACE 
+add_library(dynamic_int INTERFACE)
+target_include_directories(dynamic_int INTERFACE 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include>
 )
@@ -35,48 +35,48 @@ target_include_directories(unity PUBLIC libs/unity)
 add_executable(tests
     main.c
 )
-target_link_libraries(tests PRIVATE dynamic_bigint unity m)
-target_compile_definitions(tests PRIVATE DB_IMPLEMENTATION)
+target_link_libraries(tests PRIVATE dynamic_int unity m)
+target_compile_definitions(tests PRIVATE DI_IMPLEMENTATION)
 
 # Enable testing
 enable_testing()
-add_test(NAME dynamic_bigint_tests COMMAND tests)
+add_test(NAME dynamic_int_tests COMMAND tests)
 
 # Install configuration
-install(FILES dynamic_bigint.h
+install(FILES dynamic_int.h
     DESTINATION include
 )
 
-install(TARGETS dynamic_bigint
-    EXPORT dynamic_bigintTargets
+install(TARGETS dynamic_int
+    EXPORT dynamic_intTargets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
 )
 
-install(EXPORT dynamic_bigintTargets
-    FILE dynamic_bigintTargets.cmake
-    NAMESPACE dynamic_bigint::
-    DESTINATION lib/cmake/dynamic_bigint
+install(EXPORT dynamic_intTargets
+    FILE dynamic_intTargets.cmake
+    NAMESPACE dynamic_int::
+    DESTINATION lib/cmake/dynamic_int
 )
 
 # Create config files
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-    dynamic_bigintConfigVersion.cmake
+    dynamic_intConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY AnyNewerVersion
 )
 
 configure_package_config_file(
-    ${CMAKE_CURRENT_LIST_DIR}/cmake/dynamic_bigintConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/dynamic_bigintConfig.cmake
-    INSTALL_DESTINATION lib/cmake/dynamic_bigint
+    ${CMAKE_CURRENT_LIST_DIR}/cmake/dynamic_intConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/dynamic_intConfig.cmake
+    INSTALL_DESTINATION lib/cmake/dynamic_int
 )
 
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/dynamic_bigintConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/dynamic_bigintConfigVersion.cmake
-    DESTINATION lib/cmake/dynamic_bigint
+    ${CMAKE_CURRENT_BINARY_DIR}/dynamic_intConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/dynamic_intConfigVersion.cmake
+    DESTINATION lib/cmake/dynamic_int
 )
