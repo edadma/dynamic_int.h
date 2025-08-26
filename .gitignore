@@ -73,3 +73,5 @@ callgrind.out.*
 *.bak
 *.backup
 *.old
+
+docs/
