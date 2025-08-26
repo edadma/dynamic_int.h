@@ -548,6 +548,426 @@ void test_to_string_zero(void) {
     db_release(&zero);
 }
 
+// String parsing tests
+void test_from_string_decimal(void) {
+    db_bigint a = db_from_string("12345", 10);
+    TEST_ASSERT_NOT_NULL(a);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(a, &result));
+    TEST_ASSERT_EQUAL_INT32(12345, result);
+    
+    db_release(&a);
+}
+
+void test_from_string_negative(void) {
+    db_bigint a = db_from_string("-6789", 10);
+    TEST_ASSERT_NOT_NULL(a);
+    TEST_ASSERT_TRUE(db_is_negative(a));
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(a, &result));
+    TEST_ASSERT_EQUAL_INT32(-6789, result);
+    
+    db_release(&a);
+}
+
+void test_from_string_hex(void) {
+    db_bigint a = db_from_string("FF", 16);
+    TEST_ASSERT_NOT_NULL(a);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(a, &result));
+    TEST_ASSERT_EQUAL_INT32(255, result);
+    
+    db_release(&a);
+}
+
+void test_from_string_binary(void) {
+    db_bigint a = db_from_string("1010", 2);
+    TEST_ASSERT_NOT_NULL(a);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(a, &result));
+    TEST_ASSERT_EQUAL_INT32(10, result);
+    
+    db_release(&a);
+}
+
+void test_from_string_zero(void) {
+    db_bigint a = db_from_string("0", 10);
+    TEST_ASSERT_NOT_NULL(a);
+    TEST_ASSERT_TRUE(db_is_zero(a));
+    
+    db_release(&a);
+}
+
+// Division tests
+void test_divide_basic(void) {
+    db_bigint a = db_from_int32(42);
+    db_bigint b = db_from_int32(6);
+    db_bigint quotient = db_divide(a, b);
+    
+    TEST_ASSERT_NOT_NULL(quotient);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(quotient, &result));
+    TEST_ASSERT_EQUAL_INT32(7, result);
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&quotient);
+}
+
+void test_divide_with_remainder(void) {
+    db_bigint a = db_from_int32(17);
+    db_bigint b = db_from_int32(5);
+    db_bigint quotient = db_divide(a, b);
+    
+    TEST_ASSERT_NOT_NULL(quotient);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(quotient, &result));
+    TEST_ASSERT_EQUAL_INT32(3, result);
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&quotient);
+}
+
+void test_divide_negative(void) {
+    db_bigint a = db_from_int32(-20);
+    db_bigint b = db_from_int32(4);
+    db_bigint quotient = db_divide(a, b);
+    
+    TEST_ASSERT_NOT_NULL(quotient);
+    TEST_ASSERT_TRUE(db_is_negative(quotient));
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(quotient, &result));
+    TEST_ASSERT_EQUAL_INT32(-5, result);
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&quotient);
+}
+
+// Modular exponentiation tests
+void test_mod_pow_basic(void) {
+    db_bigint base = db_from_int32(2);
+    db_bigint exp = db_from_int32(8);
+    db_bigint mod = db_from_int32(100);
+    db_bigint result = db_mod_pow(base, exp, mod);
+    
+    TEST_ASSERT_NOT_NULL(result);
+    
+    int32_t val;
+    TEST_ASSERT_TRUE(db_to_int32(result, &val));
+    TEST_ASSERT_EQUAL_INT32(56, val); // 2^8 % 100 = 256 % 100 = 56
+    
+    db_release(&base);
+    db_release(&exp);
+    db_release(&mod);
+    db_release(&result);
+}
+
+void test_mod_pow_zero_exp(void) {
+    db_bigint base = db_from_int32(5);
+    db_bigint exp = db_zero();
+    db_bigint mod = db_from_int32(7);
+    db_bigint result = db_mod_pow(base, exp, mod);
+    
+    TEST_ASSERT_NOT_NULL(result);
+    
+    int32_t val;
+    TEST_ASSERT_TRUE(db_to_int32(result, &val));
+    TEST_ASSERT_EQUAL_INT32(1, val); // Any number to power 0 is 1
+    
+    db_release(&base);
+    db_release(&exp);
+    db_release(&mod);
+    db_release(&result);
+}
+
+// Prime testing tests
+void test_is_prime_small_primes(void) {
+    db_bigint two = db_from_int32(2);
+    db_bigint three = db_from_int32(3);
+    db_bigint five = db_from_int32(5);
+    db_bigint seven = db_from_int32(7);
+    
+    TEST_ASSERT_TRUE(db_is_prime(two, 10));
+    TEST_ASSERT_TRUE(db_is_prime(three, 10));
+    TEST_ASSERT_TRUE(db_is_prime(five, 10));
+    TEST_ASSERT_TRUE(db_is_prime(seven, 10));
+    
+    db_release(&two);
+    db_release(&three);
+    db_release(&five);
+    db_release(&seven);
+}
+
+void test_is_prime_composites(void) {
+    db_bigint four = db_from_int32(4);
+    db_bigint six = db_from_int32(6);
+    db_bigint eight = db_from_int32(8);
+    db_bigint nine = db_from_int32(9);
+    
+    TEST_ASSERT_FALSE(db_is_prime(four, 10));
+    TEST_ASSERT_FALSE(db_is_prime(six, 10));
+    TEST_ASSERT_FALSE(db_is_prime(eight, 10));
+    TEST_ASSERT_FALSE(db_is_prime(nine, 10));
+    
+    db_release(&four);
+    db_release(&six);
+    db_release(&eight);
+    db_release(&nine);
+}
+
+void test_next_prime(void) {
+    db_bigint ten = db_from_int32(10);
+    db_bigint next = db_next_prime(ten);
+    
+    TEST_ASSERT_NOT_NULL(next);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(next, &result));
+    TEST_ASSERT_EQUAL_INT32(11, result);
+    
+    db_release(&ten);
+    db_release(&next);
+}
+
+// GCD/LCM tests
+void test_gcd_basic(void) {
+    db_bigint a = db_from_int32(48);
+    db_bigint b = db_from_int32(18);
+    db_bigint gcd = db_gcd(a, b);
+    
+    TEST_ASSERT_NOT_NULL(gcd);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(gcd, &result));
+    TEST_ASSERT_EQUAL_INT32(6, result);
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&gcd);
+}
+
+void test_lcm_basic(void) {
+    db_bigint a = db_from_int32(12);
+    db_bigint b = db_from_int32(18);
+    db_bigint lcm = db_lcm(a, b);
+    
+    TEST_ASSERT_NOT_NULL(lcm);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(lcm, &result));
+    TEST_ASSERT_EQUAL_INT32(36, result);
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&lcm);
+}
+
+void test_extended_gcd(void) {
+    db_bigint a = db_from_int32(35);
+    db_bigint b = db_from_int32(15);
+    db_bigint x = NULL, y = NULL;
+    db_bigint gcd = db_extended_gcd(a, b, &x, &y);
+    
+    TEST_ASSERT_NOT_NULL(gcd);
+    TEST_ASSERT_NOT_NULL(x);
+    TEST_ASSERT_NOT_NULL(y);
+    
+    int32_t gcd_val;
+    TEST_ASSERT_TRUE(db_to_int32(gcd, &gcd_val));
+    TEST_ASSERT_EQUAL_INT32(5, gcd_val);
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&gcd);
+    db_release(&x);
+    db_release(&y);
+}
+
+// Square root tests
+void test_sqrt_perfect_square(void) {
+    db_bigint num = db_from_int32(144);
+    db_bigint root = db_sqrt(num);
+    
+    TEST_ASSERT_NOT_NULL(root);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(root, &result));
+    TEST_ASSERT_EQUAL_INT32(12, result);
+    
+    db_release(&num);
+    db_release(&root);
+}
+
+void test_sqrt_non_perfect_square(void) {
+    db_bigint num = db_from_int32(10);
+    db_bigint root = db_sqrt(num);
+    
+    TEST_ASSERT_NOT_NULL(root);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(root, &result));
+    TEST_ASSERT_EQUAL_INT32(3, result); // floor(sqrt(10)) = 3
+    
+    db_release(&num);
+    db_release(&root);
+}
+
+// Factorial tests
+void test_factorial_small(void) {
+    db_bigint fact5 = db_factorial(5);
+    TEST_ASSERT_NOT_NULL(fact5);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(fact5, &result));
+    TEST_ASSERT_EQUAL_INT32(120, result);
+    
+    db_release(&fact5);
+}
+
+void test_factorial_zero(void) {
+    db_bigint fact0 = db_factorial(0);
+    TEST_ASSERT_NOT_NULL(fact0);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(fact0, &result));
+    TEST_ASSERT_EQUAL_INT32(1, result);
+    
+    db_release(&fact0);
+}
+
+// Bitwise operation tests
+void test_bitwise_and(void) {
+    db_bigint a = db_from_int32(12); // 1100 in binary
+    db_bigint b = db_from_int32(10); // 1010 in binary
+    db_bigint result = db_and(a, b);
+    
+    TEST_ASSERT_NOT_NULL(result);
+    
+    int32_t val;
+    TEST_ASSERT_TRUE(db_to_int32(result, &val));
+    TEST_ASSERT_EQUAL_INT32(8, val); // 1000 in binary
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&result);
+}
+
+void test_bitwise_or(void) {
+    db_bigint a = db_from_int32(12); // 1100 in binary
+    db_bigint b = db_from_int32(10); // 1010 in binary
+    db_bigint result = db_or(a, b);
+    
+    TEST_ASSERT_NOT_NULL(result);
+    
+    int32_t val;
+    TEST_ASSERT_TRUE(db_to_int32(result, &val));
+    TEST_ASSERT_EQUAL_INT32(14, val); // 1110 in binary
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&result);
+}
+
+void test_bitwise_xor(void) {
+    db_bigint a = db_from_int32(12); // 1100 in binary
+    db_bigint b = db_from_int32(10); // 1010 in binary
+    db_bigint result = db_xor(a, b);
+    
+    TEST_ASSERT_NOT_NULL(result);
+    
+    int32_t val;
+    TEST_ASSERT_TRUE(db_to_int32(result, &val));
+    TEST_ASSERT_EQUAL_INT32(6, val); // 0110 in binary
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&result);
+}
+
+void test_bitwise_not(void) {
+    db_bigint a = db_from_int32(5); // Binary: 101
+    db_bigint result = db_not(a);
+    
+    TEST_ASSERT_NOT_NULL(result);
+    TEST_ASSERT_FALSE(db_is_negative(result)); // Bitwise NOT returns positive result
+    
+    // The exact value will be large since it's ~5 with extended precision
+    // Just verify it's a valid positive result
+    TEST_ASSERT_TRUE(db_is_positive(result));
+    
+    db_release(&a);
+    db_release(&result);
+}
+
+void test_shift_left(void) {
+    db_bigint a = db_from_int32(5); // Binary: 101
+    db_bigint result = db_shift_left(a, 2);
+    
+    TEST_ASSERT_NOT_NULL(result);
+    
+    int32_t val;
+    TEST_ASSERT_TRUE(db_to_int32(result, &val));
+    TEST_ASSERT_EQUAL_INT32(20, val); // 5 << 2 = 20 (Binary: 10100)
+    
+    db_release(&a);
+    db_release(&result);
+}
+
+void test_shift_right(void) {
+    db_bigint a = db_from_int32(20); // Binary: 10100
+    db_bigint result = db_shift_right(a, 2);
+    
+    TEST_ASSERT_NOT_NULL(result);
+    
+    int32_t val;
+    TEST_ASSERT_TRUE(db_to_int32(result, &val));
+    TEST_ASSERT_EQUAL_INT32(5, val); // 20 >> 2 = 5 (Binary: 101)
+    
+    db_release(&a);
+    db_release(&result);
+}
+
+// Random number tests (basic - just verify they don't crash)
+void test_random_basic(void) {
+    db_bigint random_bits = db_random(32);
+    TEST_ASSERT_NOT_NULL(random_bits);
+    
+    db_release(&random_bits);
+}
+
+void test_random_range(void) {
+    db_bigint min_val = db_from_int32(10);
+    db_bigint max_val = db_from_int32(100);
+    db_bigint random_val = db_random_range(min_val, max_val);
+    
+    TEST_ASSERT_NOT_NULL(random_val);
+    TEST_ASSERT_TRUE(db_greater_equal(random_val, min_val));
+    TEST_ASSERT_TRUE(db_less(random_val, max_val));
+    
+    db_release(&min_val);
+    db_release(&max_val);
+    db_release(&random_val);
+}
+
+// Utility function tests
+void test_bit_length(void) {
+    db_bigint a = db_from_int32(7); // Binary: 111
+    size_t length = db_bit_length(a);
+    
+    TEST_ASSERT_EQUAL_size_t(3, length);
+    
+    db_release(&a);
+}
+
 int main(void) {
     UNITY_BEGIN();
     
@@ -616,6 +1036,55 @@ int main(void) {
     // String conversion tests
     RUN_TEST(test_to_string_basic);
     RUN_TEST(test_to_string_zero);
+    
+    // String parsing tests
+    RUN_TEST(test_from_string_decimal);
+    RUN_TEST(test_from_string_negative);
+    RUN_TEST(test_from_string_hex);
+    RUN_TEST(test_from_string_binary);
+    RUN_TEST(test_from_string_zero);
+    
+    // Division tests
+    RUN_TEST(test_divide_basic);
+    RUN_TEST(test_divide_with_remainder);
+    RUN_TEST(test_divide_negative);
+    
+    // Modular exponentiation tests
+    RUN_TEST(test_mod_pow_basic);
+    RUN_TEST(test_mod_pow_zero_exp);
+    
+    // Prime testing tests
+    RUN_TEST(test_is_prime_small_primes);
+    RUN_TEST(test_is_prime_composites);
+    RUN_TEST(test_next_prime);
+    
+    // GCD/LCM tests
+    RUN_TEST(test_gcd_basic);
+    RUN_TEST(test_lcm_basic);
+    RUN_TEST(test_extended_gcd);
+    
+    // Square root tests
+    RUN_TEST(test_sqrt_perfect_square);
+    RUN_TEST(test_sqrt_non_perfect_square);
+    
+    // Factorial tests
+    RUN_TEST(test_factorial_small);
+    RUN_TEST(test_factorial_zero);
+    
+    // Bitwise operation tests
+    RUN_TEST(test_bitwise_and);
+    RUN_TEST(test_bitwise_or);
+    RUN_TEST(test_bitwise_xor);
+    RUN_TEST(test_bitwise_not);
+    RUN_TEST(test_shift_left);
+    RUN_TEST(test_shift_right);
+    
+    // Random number tests
+    RUN_TEST(test_random_basic);
+    RUN_TEST(test_random_range);
+    
+    // Utility function tests
+    RUN_TEST(test_bit_length);
     
     return UNITY_END();
 }
