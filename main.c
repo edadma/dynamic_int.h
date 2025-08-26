@@ -229,6 +229,263 @@ void test_negation(void) {
     db_release(&pos_again);
 }
 
+// Multiplication tests
+void test_multiplication_basic(void) {
+    db_bigint a = db_from_int32(6);
+    db_bigint b = db_from_int32(7);
+    db_bigint product = db_multiply(a, b);
+    
+    TEST_ASSERT_NOT_NULL(product);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(product, &result));
+    TEST_ASSERT_EQUAL_INT32(42, result);
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&product);
+}
+
+void test_multiplication_int32(void) {
+    db_bigint a = db_from_int32(8);
+    db_bigint product = db_multiply_int32(a, 5);
+    
+    TEST_ASSERT_NOT_NULL(product);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(product, &result));
+    TEST_ASSERT_EQUAL_INT32(40, result);
+    
+    db_release(&a);
+    db_release(&product);
+}
+
+void test_multiplication_with_zero(void) {
+    db_bigint a = db_from_int32(42);
+    db_bigint zero = db_zero();
+    db_bigint product = db_multiply(a, zero);
+    
+    TEST_ASSERT_NOT_NULL(product);
+    TEST_ASSERT_TRUE(db_is_zero(product));
+    
+    db_release(&a);
+    db_release(&zero);
+    db_release(&product);
+}
+
+void test_multiplication_negative(void) {
+    db_bigint a = db_from_int32(-3);
+    db_bigint b = db_from_int32(4);
+    db_bigint product = db_multiply(a, b);
+    
+    TEST_ASSERT_NOT_NULL(product);
+    TEST_ASSERT_TRUE(db_is_negative(product));
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(product, &result));
+    TEST_ASSERT_EQUAL_INT32(-12, result);
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&product);
+}
+
+// Modulo tests
+void test_modulo_basic(void) {
+    db_bigint a = db_from_int32(17);
+    db_bigint b = db_from_int32(5);
+    db_bigint remainder = db_mod(a, b);
+    
+    TEST_ASSERT_NOT_NULL(remainder);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(remainder, &result));
+    TEST_ASSERT_EQUAL_INT32(2, result);
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&remainder);
+}
+
+void test_modulo_exact_division(void) {
+    db_bigint a = db_from_int32(15);
+    db_bigint b = db_from_int32(3);
+    db_bigint remainder = db_mod(a, b);
+    
+    TEST_ASSERT_NOT_NULL(remainder);
+    TEST_ASSERT_TRUE(db_is_zero(remainder));
+    
+    db_release(&a);
+    db_release(&b);
+    db_release(&remainder);
+}
+
+// Absolute value tests
+void test_abs_positive(void) {
+    db_bigint pos = db_from_int32(42);
+    db_bigint abs_val = db_abs(pos);
+    
+    TEST_ASSERT_NOT_NULL(abs_val);
+    TEST_ASSERT_TRUE(db_equal(pos, abs_val));
+    
+    db_release(&pos);
+    db_release(&abs_val);
+}
+
+void test_abs_negative(void) {
+    db_bigint neg = db_from_int32(-42);
+    db_bigint abs_val = db_abs(neg);
+    
+    TEST_ASSERT_NOT_NULL(abs_val);
+    TEST_ASSERT_FALSE(db_is_negative(abs_val));
+    TEST_ASSERT_TRUE(db_is_positive(abs_val));
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(abs_val, &result));
+    TEST_ASSERT_EQUAL_INT32(42, result);
+    
+    db_release(&neg);
+    db_release(&abs_val);
+}
+
+void test_abs_zero(void) {
+    db_bigint zero = db_zero();
+    db_bigint abs_val = db_abs(zero);
+    
+    TEST_ASSERT_NOT_NULL(abs_val);
+    TEST_ASSERT_TRUE(db_is_zero(abs_val));
+    
+    db_release(&zero);
+    db_release(&abs_val);
+}
+
+// Double conversion tests (using basic float comparison since Unity has double disabled)
+void test_to_double_basic(void) {
+    db_bigint a = db_from_int32(12345);
+    double result = db_to_double(a);
+    
+    TEST_ASSERT_FLOAT_WITHIN(0.1, 12345.0f, (float)result);
+    
+    db_release(&a);
+}
+
+void test_to_double_negative(void) {
+    db_bigint a = db_from_int32(-67890);
+    double result = db_to_double(a);
+    
+    TEST_ASSERT_FLOAT_WITHIN(0.1, -67890.0f, (float)result);
+    
+    db_release(&a);
+}
+
+void test_to_double_zero(void) {
+    db_bigint zero = db_zero();
+    double result = db_to_double(zero);
+    
+    TEST_ASSERT_FLOAT_WITHIN(0.1, 0.0f, (float)result);
+    
+    db_release(&zero);
+}
+
+// Subtraction with int32 tests
+void test_subtract_int32_basic(void) {
+    db_bigint a = db_from_int32(50);
+    db_bigint diff = db_subtract_int32(a, 20);
+    
+    TEST_ASSERT_NOT_NULL(diff);
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(diff, &result));
+    TEST_ASSERT_EQUAL_INT32(30, result);
+    
+    db_release(&a);
+    db_release(&diff);
+}
+
+void test_subtract_int32_negative_result(void) {
+    db_bigint a = db_from_int32(10);
+    db_bigint diff = db_subtract_int32(a, 25);
+    
+    TEST_ASSERT_NOT_NULL(diff);
+    TEST_ASSERT_TRUE(db_is_negative(diff));
+    
+    int32_t result;
+    TEST_ASSERT_TRUE(db_to_int32(diff, &result));
+    TEST_ASSERT_EQUAL_INT32(-15, result);
+    
+    db_release(&a);
+    db_release(&diff);
+}
+
+// Unsigned integer creation tests
+void test_from_uint32(void) {
+    db_bigint a = db_from_uint32(4294967295U); // UINT32_MAX
+    TEST_ASSERT_NOT_NULL(a);
+    TEST_ASSERT_FALSE(db_is_negative(a));
+    TEST_ASSERT_TRUE(db_is_positive(a));
+    
+    // Convert to int64 since it won't fit in int32
+    int64_t result;
+    TEST_ASSERT_TRUE(db_to_int64(a, &result));
+    TEST_ASSERT_EQUAL_INT64(4294967295LL, result);
+    
+    db_release(&a);
+}
+
+void test_from_uint64(void) {
+    db_bigint a = db_from_uint64(9876543210123ULL);
+    TEST_ASSERT_NOT_NULL(a);
+    TEST_ASSERT_FALSE(db_is_negative(a));
+    TEST_ASSERT_TRUE(db_is_positive(a));
+    
+    int64_t result;
+    TEST_ASSERT_TRUE(db_to_int64(a, &result));
+    TEST_ASSERT_EQUAL_INT64(9876543210123LL, result);
+    
+    db_release(&a);
+}
+
+// Additional overflow detection tests
+void test_overflow_detection_int32_multiply(void) {
+    int32_t result;
+    
+    // Test normal case
+    TEST_ASSERT_TRUE(db_multiply_overflow_int32(100, 200, &result));
+    TEST_ASSERT_EQUAL_INT32(20000, result);
+    
+    // Test overflow case
+    TEST_ASSERT_FALSE(db_multiply_overflow_int32(INT32_MAX, 2, &result));
+    
+    // Test zero multiplication
+    TEST_ASSERT_TRUE(db_multiply_overflow_int32(INT32_MAX, 0, &result));
+    TEST_ASSERT_EQUAL_INT32(0, result);
+}
+
+void test_overflow_detection_int64_operations(void) {
+    int64_t result;
+    
+    // Test int64 addition
+    TEST_ASSERT_TRUE(db_add_overflow_int64(1000000000000LL, 2000000000000LL, &result));
+    TEST_ASSERT_EQUAL_INT64(3000000000000LL, result);
+    
+    // Test int64 addition overflow
+    TEST_ASSERT_FALSE(db_add_overflow_int64(INT64_MAX, 1, &result));
+    
+    // Test int64 subtraction
+    TEST_ASSERT_TRUE(db_subtract_overflow_int64(5000000000000LL, 2000000000000LL, &result));
+    TEST_ASSERT_EQUAL_INT64(3000000000000LL, result);
+    
+    // Test int64 subtraction underflow
+    TEST_ASSERT_FALSE(db_subtract_overflow_int64(INT64_MIN, 1, &result));
+    
+    // Test int64 multiplication
+    TEST_ASSERT_TRUE(db_multiply_overflow_int64(1000000LL, 2000000LL, &result));
+    TEST_ASSERT_EQUAL_INT64(2000000000000LL, result);
+    
+    // Test int64 multiplication overflow
+    TEST_ASSERT_FALSE(db_multiply_overflow_int64(INT64_MAX, 2, &result));
+}
+
 // Overflow detection tests
 void test_overflow_detection_int32(void) {
     int32_t result;
@@ -319,10 +576,38 @@ int main(void) {
     RUN_TEST(test_addition_int32);
     RUN_TEST(test_addition_with_zero);
     RUN_TEST(test_subtraction_basic);
+    RUN_TEST(test_subtract_int32_basic);
+    RUN_TEST(test_subtract_int32_negative_result);
     RUN_TEST(test_negation);
+    
+    // Multiplication tests
+    RUN_TEST(test_multiplication_basic);
+    RUN_TEST(test_multiplication_int32);
+    RUN_TEST(test_multiplication_with_zero);
+    RUN_TEST(test_multiplication_negative);
+    
+    // Modulo tests
+    RUN_TEST(test_modulo_basic);
+    RUN_TEST(test_modulo_exact_division);
+    
+    // Absolute value tests
+    RUN_TEST(test_abs_positive);
+    RUN_TEST(test_abs_negative);
+    RUN_TEST(test_abs_zero);
+    
+    // Double conversion tests
+    RUN_TEST(test_to_double_basic);
+    RUN_TEST(test_to_double_negative);
+    RUN_TEST(test_to_double_zero);
+    
+    // Unsigned creation tests
+    RUN_TEST(test_from_uint32);
+    RUN_TEST(test_from_uint64);
     
     // Overflow detection tests
     RUN_TEST(test_overflow_detection_int32);
+    RUN_TEST(test_overflow_detection_int32_multiply);
+    RUN_TEST(test_overflow_detection_int64_operations);
     
     // 64-bit tests
     RUN_TEST(test_int64_conversion);

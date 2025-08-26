@@ -772,8 +772,17 @@ db_bigint db_mod(db_bigint a, db_bigint b) {
 db_bigint db_abs(db_bigint a) {
     if (!a) return NULL;
     
-    // For now, just return a copy (our simple implementation doesn't track sign)
-    return db_retain(a);
+    // If already positive or zero, just return a copy
+    if (!a->is_negative) {
+        return db_copy(a);
+    }
+    
+    // Create a positive copy of the negative number
+    db_bigint result = db_copy(a);
+    if (result && result->limb_count > 0) {
+        result->is_negative = false;
+    }
+    return result;
 }
 
 #endif // DB_IMPLEMENTATION
