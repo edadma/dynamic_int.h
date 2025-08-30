@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(dynamic_int 
-    VERSION 0.1.0
+    VERSION 1.0.0
     DESCRIPTION "Reference-counted arbitrary precision integer library"
     LANGUAGES C)
 
 # Set C standard
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Compiler flags

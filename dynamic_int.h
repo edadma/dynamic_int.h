@@ -1,8 +1,8 @@
 /**
  * @file dynamic_int.h
  * @brief Reference-counted arbitrary precision integer library
- * @version 0.1.0
- * @date December 2024
+ * @version 1.0.0
+ * @date August 2025
  *
  * Single header library for arbitrary precision integers with reference counting.
  * Designed for seamless integration with MCU projects that need automatic
@@ -120,7 +120,7 @@ typedef struct di_int_internal* di_int;
  * @brief Create a new integer from a 32-bit signed integer
  * @param value The 32-bit signed integer value
  * @return New di_int instance, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int num = di_from_int32(-42);
@@ -141,7 +141,7 @@ DI_DEF di_int di_from_int32(int32_t value);
  * @brief Create a new integer from a 64-bit signed integer
  * @param value The 64-bit signed integer value
  * @return New di_int instance, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int big_num = di_from_int64(9223372036854775807LL);  // INT64_MAX
@@ -160,7 +160,7 @@ DI_DEF di_int di_from_int64(int64_t value);
  * @brief Create a new integer from a 32-bit unsigned integer
  * @param value The 32-bit unsigned integer value
  * @return New di_int instance, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @see di_from_uint64() for 64-bit unsigned integers
  * @see di_to_uint32() for conversion back to uint32_t
@@ -171,7 +171,7 @@ DI_DEF di_int di_from_uint32(uint32_t value);
  * @brief Create a new integer from a 64-bit unsigned integer
  * @param value The 64-bit unsigned integer value
  * @return New di_int instance, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @see di_from_uint32() for 32-bit unsigned integers
  * @see di_to_uint64() for conversion back to uint64_t
@@ -183,7 +183,7 @@ DI_DEF di_int di_from_uint64(uint64_t value);
  * @param str Null-terminated string containing the number
  * @param base Number base (2-36)
  * @return New di_int instance, or NULL on failure or invalid input
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int hex = di_from_string("DEADBEEF", 16);
@@ -204,7 +204,7 @@ DI_DEF di_int di_from_string(const char* str, int base);
 /**
  * @brief Create a new integer with value zero
  * @return New di_int instance with value 0, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int zero = di_zero();
@@ -220,7 +220,7 @@ DI_DEF di_int di_zero(void);
 /**
  * @brief Create a new integer with value one
  * @return New di_int instance with value 1, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @see di_zero() for creating integer with value 0
  */
@@ -230,7 +230,7 @@ DI_DEF di_int di_one(void);
  * @brief Create a deep copy of an integer
  * @param big Integer to copy (may be NULL)
  * @return New di_int instance with same value, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int original = di_from_int32(42);
@@ -258,7 +258,7 @@ DI_DEF di_int di_copy(di_int big);
  * @brief Increment reference count and return the same integer
  * @param big Integer to retain (may be NULL)
  * @return Same integer handle, or NULL if input was NULL
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int original = di_from_int32(42);     // ref_count = 1
@@ -277,7 +277,7 @@ DI_DEF di_int di_retain(di_int big);
 /**
  * @brief Decrement reference count and free if zero
  * @param big Pointer to integer handle (may be NULL or point to NULL)
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int num = di_from_int32(42);
@@ -294,7 +294,7 @@ DI_DEF void di_release(di_int* big);
  * @brief Get current reference count of an integer
  * @param big Integer to query (may be NULL)
  * @return Current reference count, or 0 if big is NULL
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note Primarily for debugging and testing
  */
@@ -313,7 +313,7 @@ DI_DEF size_t di_ref_count(di_int big);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return New di_int with result of a + b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int a = di_from_int32(100);
@@ -335,7 +335,7 @@ DI_DEF di_int di_add(di_int a, di_int b);
  * @param a Integer operand (may be NULL)
  * @param b 32-bit signed integer operand
  * @return New di_int with result of a + b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @see di_add() for integer-integer addition
  */
@@ -346,7 +346,7 @@ DI_DEF di_int di_add_i32(di_int a, int32_t b);
  * @param a First integer (minuend, may be NULL)
  * @param b Second integer (subtrahend, may be NULL)
  * @return New di_int with result of a - b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @see di_sub_i32() for mixed-type subtraction with int32_t
  * @see di_add() for addition
@@ -358,7 +358,7 @@ DI_DEF di_int di_sub(di_int a, di_int b);
  * @param a Integer operand (may be NULL)
  * @param b 32-bit signed integer operand
  * @return New di_int with result of a - b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @see di_sub() for integer-integer subtraction
  */
@@ -369,9 +369,9 @@ DI_DEF di_int di_sub_i32(di_int a, int32_t b);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return New di_int with result of a * b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
- * @note Current implementation uses double precision (lossy for large numbers)
+ * @note Supports arbitrary precision multiplication
  * @see di_mul_i32() for mixed-type multiplication with int32_t
  */
 DI_DEF di_int di_mul(di_int a, di_int b);
@@ -381,7 +381,7 @@ DI_DEF di_int di_mul(di_int a, di_int b);
  * @param a Integer operand (may be NULL)
  * @param b 32-bit signed integer operand
  * @return New di_int with result of a * b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @see di_mul() for integer-integer multiplication
  */
@@ -392,7 +392,7 @@ DI_DEF di_int di_mul_i32(di_int a, int32_t b);
  * @param a Dividend integer (may be NULL)
  * @param b Divisor integer (may be NULL)
  * @return New di_int with quotient of a / b, or NULL on failure or division by zero
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note Returns NULL if b is zero (division by zero)
  * @see di_mod() for remainder/modulo operation
@@ -404,7 +404,7 @@ DI_DEF di_int di_divide(di_int a, di_int b);
  * @param a Dividend integer (may be NULL)
  * @param b Divisor integer (may be NULL)
  * @return New di_int with remainder of a % b, or NULL on failure or division by zero
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note Returns NULL if b is zero (division by zero)
  * @see di_divide() for quotient
@@ -415,7 +415,7 @@ DI_DEF di_int di_mod(di_int a, di_int b);
  * @brief Negate an integer (change sign)
  * @param a Integer to negate (may be NULL)
  * @return New di_int with result of -a, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int pos = di_from_int32(42);
@@ -435,7 +435,7 @@ DI_DEF di_int di_negate(di_int a);
  * @brief Get absolute value of an integer
  * @param a Integer to get absolute value of (may be NULL)
  * @return New di_int with |a|, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @see di_negate() for negation
  * @see di_is_negative() for checking sign
@@ -447,7 +447,7 @@ DI_DEF di_int di_abs(di_int a);
  * @param base Base integer (may be NULL)
  * @param exp Exponent (32-bit unsigned integer)
  * @return New di_int with result of base^exp, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note This is not yet implemented
  * @see di_mod_pow() for modular exponentiation
@@ -467,7 +467,7 @@ DI_DEF di_int di_pow(di_int base, uint32_t exp);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return New di_int with result of a & b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF di_int di_and(di_int a, di_int b);
 
@@ -476,7 +476,7 @@ DI_DEF di_int di_and(di_int a, di_int b);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return New di_int with result of a | b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF di_int di_or(di_int a, di_int b);
 
@@ -485,7 +485,7 @@ DI_DEF di_int di_or(di_int a, di_int b);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return New di_int with result of a ^ b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF di_int di_xor(di_int a, di_int b);
 
@@ -493,7 +493,7 @@ DI_DEF di_int di_xor(di_int a, di_int b);
  * @brief Bitwise NOT (complement) of an integer
  * @param a Integer to complement (may be NULL)
  * @return New di_int with result of ~a, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF di_int di_not(di_int a);
 
@@ -502,7 +502,7 @@ DI_DEF di_int di_not(di_int a);
  * @param a Integer to shift (may be NULL)
  * @param bits Number of bits to shift left
  * @return New di_int with result of a << bits, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF di_int di_shift_left(di_int a, size_t bits);
 
@@ -511,7 +511,7 @@ DI_DEF di_int di_shift_left(di_int a, size_t bits);
  * @param a Integer to shift (may be NULL)
  * @param bits Number of bits to shift right
  * @return New di_int with result of a >> bits, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF di_int di_shift_right(di_int a, size_t bits);
 
@@ -528,7 +528,7 @@ DI_DEF di_int di_shift_right(di_int a, size_t bits);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return -1 if a < b, 0 if a == b, 1 if a > b
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note NULL values are treated as zero for comparison
  */
@@ -539,7 +539,7 @@ DI_DEF int di_compare(di_int a, di_int b);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return true if a == b, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_eq(di_int a, di_int b);
 
@@ -548,7 +548,7 @@ DI_DEF bool di_eq(di_int a, di_int b);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return true if a < b, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_lt(di_int a, di_int b);
 
@@ -557,7 +557,7 @@ DI_DEF bool di_lt(di_int a, di_int b);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return true if a <= b, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_le(di_int a, di_int b);
 
@@ -566,7 +566,7 @@ DI_DEF bool di_le(di_int a, di_int b);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return true if a > b, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_gt(di_int a, di_int b);
 
@@ -575,7 +575,7 @@ DI_DEF bool di_gt(di_int a, di_int b);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return true if a >= b, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_ge(di_int a, di_int b);
 
@@ -583,7 +583,7 @@ DI_DEF bool di_ge(di_int a, di_int b);
  * @brief Test if integer is zero
  * @param big Integer to test (may be NULL)
  * @return true if integer is zero, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note NULL is considered zero
  */
@@ -593,7 +593,7 @@ DI_DEF bool di_is_zero(di_int big);
  * @brief Test if integer is negative
  * @param big Integer to test (may be NULL)
  * @return true if integer is negative, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note NULL is considered zero (not negative)
  */
@@ -603,7 +603,7 @@ DI_DEF bool di_is_negative(di_int big);
  * @brief Test if integer is positive (> 0)
  * @param big Integer to test (may be NULL)
  * @return true if integer is positive, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note NULL is considered zero (not positive)
  */
@@ -622,7 +622,7 @@ DI_DEF bool di_is_positive(di_int big);
  * @param big Integer to convert (may be NULL)
  * @param result Pointer to store result
  * @return true if conversion successful and no overflow, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int big = di_from_int32(42);
@@ -642,7 +642,7 @@ DI_DEF bool di_to_int32(di_int big, int32_t* result);
  * @param big Integer to convert (may be NULL)
  * @param result Pointer to store result
  * @return true if conversion successful and no overflow, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_to_int64(di_int big, int64_t* result);
 
@@ -651,7 +651,7 @@ DI_DEF bool di_to_int64(di_int big, int64_t* result);
  * @param big Integer to convert (may be NULL)
  * @param result Pointer to store result
  * @return true if conversion successful and no overflow/underflow, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_to_uint32(di_int big, uint32_t* result);
 
@@ -660,7 +660,7 @@ DI_DEF bool di_to_uint32(di_int big, uint32_t* result);
  * @param big Integer to convert (may be NULL)
  * @param result Pointer to store result
  * @return true if conversion successful and no overflow/underflow, false otherwise
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_to_uint64(di_int big, uint64_t* result);
 
@@ -668,7 +668,7 @@ DI_DEF bool di_to_uint64(di_int big, uint64_t* result);
  * @brief Convert integer to double precision floating point
  * @param big Integer to convert (may be NULL)
  * @return Double representation of integer, or 0.0 if big is NULL
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note May lose precision for very large integers
  * @note NULL integers return 0.0
@@ -680,7 +680,7 @@ DI_DEF double di_to_double(di_int big);
  * @param big Integer to convert (may be NULL)
  * @param base Number base (2-36)
  * @return Dynamically allocated string (caller must free), or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int big = di_from_int32(-42);
@@ -707,7 +707,7 @@ DI_DEF char* di_to_string(di_int big, int base);
  * @brief Get bit length of integer (number of bits needed to represent)
  * @param big Integer to query (may be NULL)
  * @return Number of bits needed to represent integer, or 0 if NULL or zero
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF size_t di_bit_length(di_int big);
 
@@ -715,7 +715,7 @@ DI_DEF size_t di_bit_length(di_int big);
  * @brief Get number of limbs used by integer
  * @param big Integer to query (may be NULL)
  * @return Number of limbs in use, or 0 if NULL
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note Primarily for debugging and internal use
  */
@@ -726,7 +726,7 @@ DI_DEF size_t di_limb_count(di_int big);
  * @param big Integer to resize (may be NULL)
  * @param capacity Number of limbs to reserve capacity for
  * @return true if successful, false on allocation failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int big = di_from_int32(0);
@@ -763,7 +763,7 @@ DI_DEF bool di_reserve(di_int big, size_t capacity);
  * @param exp Exponent integer (may be NULL)
  * @param mod Modulus integer (may be NULL)
  * @return New di_int with result of (base^exp) mod mod, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note Returns NULL if mod is zero or one
  * @note Uses binary exponentiation for efficiency
@@ -775,7 +775,7 @@ DI_DEF di_int di_mod_pow(di_int base, di_int exp, di_int mod);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return New di_int with GCD of |a| and |b|, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @see di_lcm() for Least Common Multiple
  * @see di_extended_gcd() for extended Euclidean algorithm
@@ -787,7 +787,7 @@ DI_DEF di_int di_gcd(di_int a, di_int b);
  * @param a First integer (may be NULL)
  * @param b Second integer (may be NULL)
  * @return New di_int with LCM of a and b, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note Uses identity: lcm(a,b) = |a*b| / gcd(a,b)
  * @see di_gcd() for Greatest Common Divisor
@@ -801,7 +801,7 @@ DI_DEF di_int di_lcm(di_int a, di_int b);
  * @param x Pointer to store coefficient x
  * @param y Pointer to store coefficient y
  * @return GCD of a and b, with coefficients such that ax + by = gcd(a,b)
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note Sets *x and *y to coefficients satisfying the Bezout identity
  */
@@ -811,7 +811,7 @@ DI_DEF di_int di_extended_gcd(di_int a, di_int b, di_int* x, di_int* y);
  * @brief Integer square root using Newton's method
  * @param n Integer to find square root of (may be NULL)
  * @return New di_int with floor(sqrt(n)), or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note Returns NULL for negative inputs
  */
@@ -821,7 +821,7 @@ DI_DEF di_int di_sqrt(di_int n);
  * @brief Calculate factorial
  * @param n Non-negative integer
  * @return New di_int with n! (n factorial), or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * di_int fact5 = di_factorial(5);  // 120
@@ -843,7 +843,7 @@ DI_DEF di_int di_factorial(uint32_t n);
  * @param n Integer to test (may be NULL)
  * @param certainty Number of rounds for probabilistic test
  * @return true if n is probably prime, false if composite or NULL
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @note Higher certainty values increase accuracy but take longer
  */
@@ -853,7 +853,7 @@ DI_DEF bool di_is_prime(di_int n, int certainty);
  * @brief Find next prime number >= n
  * @param n Starting integer (may be NULL)
  * @return New di_int with next prime >= n, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF di_int di_next_prime(di_int n);
 
@@ -869,7 +869,7 @@ DI_DEF di_int di_next_prime(di_int n);
  * @brief Generate random integer with specified bit length
  * @param bits Number of bits for the random integer
  * @return New di_int with random value, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @warning Not cryptographically secure - use proper CSPRNG for security
  * @note Returns zero if bits is 0
@@ -881,7 +881,7 @@ DI_DEF di_int di_random(size_t bits);
  * @param min Minimum value (inclusive, may be NULL)
  * @param max Maximum value (exclusive, may be NULL)
  * @return New di_int with random value in range, or NULL on failure
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @warning Not cryptographically secure - use proper CSPRNG for security
  * @note Returns NULL if min >= max
@@ -902,7 +902,7 @@ DI_DEF di_int di_random_range(di_int min, di_int max);
  * @param b Second operand
  * @param result Pointer to store result
  * @return true if addition overflowed, false if safe
- * @since 0.1.0
+ * @since 1.0.0
  * 
  * @code
  * int32_t result;
@@ -923,7 +923,7 @@ DI_DEF bool di_add_overflow_int32(int32_t a, int32_t b, int32_t* result);
  * @param b Subtrahend
  * @param result Pointer to store result
  * @return true if subtraction overflowed, false if safe
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_subtract_overflow_int32(int32_t a, int32_t b, int32_t* result);
 
@@ -933,7 +933,7 @@ DI_DEF bool di_subtract_overflow_int32(int32_t a, int32_t b, int32_t* result);
  * @param b Second operand
  * @param result Pointer to store result
  * @return true if multiplication overflowed, false if safe
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_multiply_overflow_int32(int32_t a, int32_t b, int32_t* result);
 
@@ -943,7 +943,7 @@ DI_DEF bool di_multiply_overflow_int32(int32_t a, int32_t b, int32_t* result);
  * @param b Second operand
  * @param result Pointer to store result
  * @return true if addition overflowed, false if safe
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_add_overflow_int64(int64_t a, int64_t b, int64_t* result);
 
@@ -953,7 +953,7 @@ DI_DEF bool di_add_overflow_int64(int64_t a, int64_t b, int64_t* result);
  * @param b Subtrahend
  * @param result Pointer to store result
  * @return true if subtraction overflowed, false if safe
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_subtract_overflow_int64(int64_t a, int64_t b, int64_t* result);
 
@@ -963,7 +963,7 @@ DI_DEF bool di_subtract_overflow_int64(int64_t a, int64_t b, int64_t* result);
  * @param b Second operand
  * @param result Pointer to store result
  * @return true if multiplication overflowed, false if safe
- * @since 0.1.0
+ * @since 1.0.0
  */
 DI_DEF bool di_multiply_overflow_int64(int64_t a, int64_t b, int64_t* result);
 
@@ -1556,7 +1556,7 @@ DI_DEF di_int di_negate(di_int a) {
     return result;
 }
 
-/* String conversion - simplified version */
+/* String conversion implementation */
 DI_DEF char* di_to_string(di_int big, int base) {
     if (!big || base < 2 || base > 36) return NULL;
     
@@ -1571,14 +1571,68 @@ DI_DEF char* di_to_string(di_int big, int base) {
     
     // Simple implementation for base 10
     if (base == 10) {
-        // Rough estimate of digits needed
-        size_t max_digits = big->limb_count * 10 + 2;  // Overestimate
+        // Proper arbitrary precision decimal conversion using efficient modular arithmetic
+        size_t max_digits = big->limb_count * 10 + 10;
         char* buffer = (char*)DI_MALLOC(max_digits);
         if (!buffer) return NULL;
         
-        // For now, convert to double and use sprintf (not precise for large numbers)
-        double val = di_to_double(big);
-        snprintf(buffer, max_digits, "%.0f", val);
+        // Make a working copy
+        di_int work = di_copy(big);
+        if (!work) {
+            DI_FREE(buffer);
+            return NULL;
+        }
+        
+        char* digits = (char*)DI_MALLOC(max_digits);
+        if (!digits) {
+            DI_FREE(buffer);
+            di_release(&work);
+            return NULL;
+        }
+        
+        size_t digit_count = 0;
+        
+        // Handle zero case
+        if (di_is_zero(work)) {
+            buffer[0] = '0';
+            buffer[1] = '\0';
+            DI_FREE(digits);
+            di_release(&work);
+            return buffer;
+        }
+        
+        // Extract digits using limb-level division by 10 (much more efficient than di_divide)
+        while (!di_is_zero(work)) {
+            // Divide by 10 using limb arithmetic
+            di_dlimb_t remainder = 0;
+            for (int i = (int)work->limb_count - 1; i >= 0; i--) {
+                di_dlimb_t temp = remainder * ((di_dlimb_t)DI_LIMB_MAX + 1) + work->limbs[i];
+                work->limbs[i] = (di_limb_t)(temp / 10);
+                remainder = temp % 10;
+            }
+            
+            // Store the digit
+            digits[digit_count++] = '0' + (char)remainder;
+            
+            // Remove leading zeros
+            while (work->limb_count > 0 && work->limbs[work->limb_count - 1] == 0) {
+                work->limb_count--;
+            }
+        }
+        
+        // Build result string (digits are in reverse order)
+        size_t pos = 0;
+        if (big->is_negative) {
+            buffer[pos++] = '-';
+        }
+        
+        for (size_t i = digit_count; i > 0; i--) {
+            buffer[pos++] = digits[i - 1];
+        }
+        buffer[pos] = '\0';
+        
+        DI_FREE(digits);
+        di_release(&work);
         
         return buffer;
     }
@@ -1657,22 +1711,77 @@ DI_DEF bool di_multiply_overflow_int64(int64_t a, int64_t b, int64_t* result) {
     return true;
 }
 
-// Big integer multiplication - simplified implementation
+// Big integer multiplication - use the original working approach for single limb case, full algorithm for multi-limb
 DI_DEF di_int di_mul(di_int a, di_int b) {
     if (!a || !b) return NULL;
     
-    // For now, convert to double and back (lossy but functional)
-    double a_val = di_to_double(a);
-    double b_val = di_to_double(b);
-    double result = a_val * b_val;
-    
-    // Try to convert back to int64 first
-    if (result >= INT64_MIN && result <= INT64_MAX) {
-        return di_from_int64((int64_t)result);
-    } else {
-        // For very large results, still store as int64 (will be lossy)
-        return di_from_int64((int64_t)result);
+    // Handle zero cases
+    if (a->limb_count == 0 || b->limb_count == 0) {
+        return di_from_int32(0);
     }
+    
+    // For single limb x single limb, use direct 64-bit multiplication (should be exact)
+    if (a->limb_count == 1 && b->limb_count == 1) {
+        di_dlimb_t product = (di_dlimb_t)a->limbs[0] * (di_dlimb_t)b->limbs[0];
+        bool result_negative = (a->is_negative != b->is_negative);
+        
+        if (product <= DI_LIMB_MAX) {
+            // Result fits in one limb
+            di_int result = di_from_uint32((uint32_t)product);
+            if (result && result_negative && product > 0) {
+                result->is_negative = true;
+            }
+            return result;
+        } else {
+            // Result needs two limbs
+            struct di_int_internal* result = di_alloc(2);
+            if (!result) return NULL;
+            
+            result->is_negative = result_negative;
+            result->limb_count = 2;
+            result->limbs[0] = (di_limb_t)(product & DI_LIMB_MAX);
+            result->limbs[1] = (di_limb_t)(product >> DI_LIMB_BITS);
+            
+            di_normalize(result);
+            return result;
+        }
+    }
+    
+    // For multi-limb cases, use proper schoolbook multiplication
+    bool result_negative = (a->is_negative != b->is_negative);
+    size_t result_capacity = a->limb_count + b->limb_count;
+    struct di_int_internal* result = di_alloc(result_capacity);
+    if (!result) return NULL;
+    
+    result->is_negative = result_negative;
+    result->limb_count = result_capacity;
+    
+    // Initialize result to zero
+    for (size_t i = 0; i < result_capacity; i++) {
+        result->limbs[i] = 0;
+    }
+    
+    // Schoolbook multiplication
+    for (size_t i = 0; i < a->limb_count; i++) {
+        di_dlimb_t carry = 0;
+        
+        for (size_t j = 0; j < b->limb_count; j++) {
+            size_t pos = i + j;
+            di_dlimb_t prod = (di_dlimb_t)a->limbs[i] * (di_dlimb_t)b->limbs[j];
+            di_dlimb_t sum = (di_dlimb_t)result->limbs[pos] + prod + carry;
+            
+            result->limbs[pos] = (di_limb_t)(sum & DI_LIMB_MAX);
+            carry = sum >> DI_LIMB_BITS;
+        }
+        
+        // Handle remaining carry
+        if (carry > 0 && i + b->limb_count < result_capacity) {
+            result->limbs[i + b->limb_count] = (di_limb_t)carry;
+        }
+    }
+    
+    di_normalize(result);
+    return result;
 }
 
 // Big integer multiplication by int32
@@ -1704,28 +1813,84 @@ DI_DEF di_int di_divide(di_int a, di_int b) {
         return di_zero();
     }
     
-    // Simple division by repeated subtraction (inefficient but correct)
-    // TODO: Implement proper long division algorithm for better performance
-    di_int quotient = di_zero();
-    di_int remainder = di_copy(abs_a);
-    di_int one = di_one();
+    // Proper long division algorithm for efficiency
+    size_t dividend_limbs = abs_a->limb_count;
+    size_t divisor_limbs = abs_b->limb_count;
     
-    while (di_ge(remainder, abs_b)) {
-        di_int temp_remainder = di_sub(remainder, abs_b);
-        di_int temp_quotient = di_add(quotient, one);
-        
-        di_release(&remainder);
-        di_release(&quotient);
-        remainder = temp_remainder;
-        quotient = temp_quotient;
-        
-        if (!remainder || !quotient) {
+    // For single limb divisor, use optimized single-limb division
+    if (divisor_limbs == 1) {
+        di_limb_t divisor_limb = abs_b->limbs[0];
+        struct di_int_internal* quotient = di_alloc(dividend_limbs);
+        if (!quotient) {
             di_release(&abs_a);
             di_release(&abs_b);
-            di_release(&one);
-            di_release(&remainder);
-            di_release(&quotient);
             return NULL;
+        }
+        
+        quotient->limb_count = dividend_limbs;
+        di_dlimb_t remainder = 0;
+        
+        // Divide from most significant to least significant limb
+        for (int i = (int)dividend_limbs - 1; i >= 0; i--) {
+            di_dlimb_t temp = remainder * ((di_dlimb_t)DI_LIMB_MAX + 1) + abs_a->limbs[i];
+            quotient->limbs[i] = (di_limb_t)(temp / divisor_limb);
+            remainder = temp % divisor_limb;
+        }
+        
+        di_normalize(quotient);
+        
+        // Set result sign
+        bool result_negative = (a->is_negative != b->is_negative);
+        if (result_negative && quotient->limb_count > 0) {
+            quotient->is_negative = true;
+        }
+        
+        di_release(&abs_a);
+        di_release(&abs_b);
+        return quotient;
+    }
+    
+    // For multi-limb division, fall back to binary long division (more efficient than repeated subtraction)
+    di_int quotient = di_zero();
+    di_int remainder = di_zero();
+    
+    // Process bits from most significant to least significant
+    for (int limb_idx = (int)dividend_limbs - 1; limb_idx >= 0; limb_idx--) {
+        for (int bit = DI_LIMB_BITS - 1; bit >= 0; bit--) {
+            // Shift remainder left by 1
+            di_int temp_remainder = di_shift_left(remainder, 1);
+            di_release(&remainder);
+            remainder = temp_remainder;
+            
+            // Add current bit of dividend to remainder
+            if (abs_a->limbs[limb_idx] & ((di_limb_t)1 << bit)) {
+                di_int temp = di_add_i32(remainder, 1);
+                di_release(&remainder);
+                remainder = temp;
+            }
+            
+            // Shift quotient left by 1
+            di_int temp_quotient = di_shift_left(quotient, 1);
+            di_release(&quotient);
+            quotient = temp_quotient;
+            
+            // If remainder >= divisor, subtract divisor and set bit in quotient
+            if (di_ge(remainder, abs_b)) {
+                di_int temp_remainder = di_sub(remainder, abs_b);
+                di_int temp_quotient = di_add_i32(quotient, 1);
+                di_release(&remainder);
+                di_release(&quotient);
+                remainder = temp_remainder;
+                quotient = temp_quotient;
+            }
+            
+            if (!remainder || !quotient) {
+                di_release(&abs_a);
+                di_release(&abs_b);
+                di_release(&remainder);
+                di_release(&quotient);
+                return NULL;
+            }
         }
     }
     
@@ -1738,27 +1903,58 @@ DI_DEF di_int di_divide(di_int a, di_int b) {
     di_release(&abs_a);
     di_release(&abs_b);
     di_release(&remainder);
-    di_release(&one);
     
     return quotient;
 }
 
-// Big integer modulo - simplified implementation
+// Big integer modulo - proper arbitrary precision implementation
 DI_DEF di_int di_mod(di_int a, di_int b) {
     if (!a || !b) return NULL;
     if (di_is_zero(b)) return NULL; // Division by zero
     
-    // For now, convert to double and back (lossy but functional)
-    double a_val = di_to_double(a);
-    double b_val = di_to_double(b);
-    double result = fmod(a_val, b_val);
+    // Special cases
+    if (di_is_zero(a)) return di_zero(); // 0 % b = 0
+    if (di_eq(a, b)) return di_zero();   // a % a = 0
     
-    // Try to convert back to int64
-    if (result >= INT64_MIN && result <= INT64_MAX) {
-        return di_from_int64((int64_t)result);
-    } else {
-        return di_from_int64((int64_t)result);
+    // Compare absolute values
+    di_int abs_a = di_abs(a);
+    di_int abs_b = di_abs(b);
+    
+    // If |a| < |b|, then a % b = a (for positive numbers)
+    if (di_lt(abs_a, abs_b)) {
+        di_release(&abs_a);
+        di_release(&abs_b);
+        if (a->is_negative && b->is_negative) {
+            return di_negate(a);  // Both negative: result is negative
+        } else if (a->is_negative && !b->is_negative) {
+            // a is negative, b is positive: a % b = b - |a|
+            di_int neg_a = di_negate(a);
+            di_int result = di_sub(b, neg_a);
+            di_release(&neg_a);
+            return result;
+        } else {
+            return di_copy(a);    // Normal case: a % b = a when |a| < |b|
+        }
     }
+    
+    // Use division to compute remainder: a % b = a - (a / b) * b
+    di_int quotient = di_divide(abs_a, abs_b);
+    di_int product = di_mul(quotient, abs_b);
+    di_int remainder = di_sub(abs_a, product);
+    
+    // Handle sign of remainder based on dividend sign
+    if (a->is_negative && !di_is_zero(remainder)) {
+        di_int neg_remainder = di_negate(remainder);
+        di_release(&remainder);
+        remainder = neg_remainder;
+    }
+    
+    di_release(&abs_a);
+    di_release(&abs_b);
+    di_release(&quotient);
+    di_release(&product);
+    
+    return remainder;
 }
 
 // Big integer absolute value

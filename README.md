@@ -1,4 +1,9 @@
-# Dynamic Int
+# dynamic_int.h
+
+[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/edadma/dynamic_int.h/releases)
+[![Language](https://img.shields.io/badge/language-C11-blue.svg)](https://en.cppreference.com/w/c/11)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Unlicense-green.svg)](#license)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS%20%7C%20MCU-lightgrey.svg)](#platform-support)
 
 A single-header C library implementing arbitrary precision integers with reference counting, designed for seamless integration with MCU projects that need automatic promotion from fixed-size integers to arbitrary precision on overflow.
 
@@ -72,7 +77,7 @@ make
 ### Manual Compilation
 
 ```bash
-gcc -std=c99 -Wall -Wextra main.c -o tests
+gcc -std=c11 -Wall -Wextra main.c -o tests
 ```
 
 ## API Overview
@@ -124,9 +129,29 @@ This project is dual-licensed under:
 
 Choose whichever license works best for your project.
 
-## Status
+## Platform Support
 
-This library is currently in development. Basic arithmetic operations are implemented, with more advanced features planned.
+This library supports:
+- **Linux**: Full support with GCC and Clang
+- **Windows**: Compatible with MSVC and MinGW
+- **macOS**: Native Clang support
+- **MCU**: Designed for microcontroller environments
+
+## Version History
+
+### v1.0.0 (August 2025)
+- ✅ **Complete arithmetic implementation**: Full arbitrary precision multiplication, division, modulo
+- ✅ **Comprehensive test suite**: 76+ unit tests with mathematically verified results
+- ✅ **String conversion**: Proper base-10 string parsing and generation
+- ✅ **Large number support**: Tested with 50+ digit numbers
+- ✅ **Memory management**: Robust reference counting system
+- ✅ **Documentation**: Complete API documentation and examples
+
+### v0.1.0 (Initial Release)
+- Basic integer creation and reference counting
+- Simple arithmetic operations
+- String conversion framework
+- Initial test infrastructure
 
 ## Contributing
 

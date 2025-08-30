@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#define DI_IMPLEMENTATION
 #include "dynamic_int.h"
 #include "unity.h"
 
@@ -968,6 +970,236 @@ void test_bit_length(void) {
     di_release(&a);
 }
 
+// Large number arithmetic tests
+void test_large_multiplication(void) {
+    // 999999999999999999 * 888888888888888888 = 888888888888888887111111111111111112
+    di_int a = di_from_string("999999999999999999", 10);
+    di_int b = di_from_string("888888888888888888", 10);
+    di_int product = di_mul(a, b);
+    
+    TEST_ASSERT_NOT_NULL(product);
+    
+    char* result_str = di_to_string(product, 10);
+    TEST_ASSERT_NOT_NULL(result_str);
+    TEST_ASSERT_EQUAL_STRING("888888888888888887111111111111111112", result_str);
+    
+    free(result_str);
+    di_release(&a);
+    di_release(&b);
+    di_release(&product);
+    
+    // 123456789012345 * 987654321098765 = 121932631137021071359549253925
+    di_int a2 = di_from_string("123456789012345", 10);
+    di_int b2 = di_from_string("987654321098765", 10);
+    di_int product2 = di_mul(a2, b2);
+    
+    result_str = di_to_string(product2, 10);
+    TEST_ASSERT_EQUAL_STRING("121932631137021071359549253925", result_str);
+    
+    free(result_str);
+    di_release(&a2);
+    di_release(&b2);
+    di_release(&product2);
+}
+
+void test_large_division(void) {
+    // 999999999999999999888888888888888888 / 999999999999999999 = 1000000000000000000
+    di_int dividend = di_from_string("999999999999999999888888888888888888", 10);
+    di_int divisor = di_from_string("999999999999999999", 10);
+    di_int quotient = di_divide(dividend, divisor);
+    
+    TEST_ASSERT_NOT_NULL(quotient);
+    
+    char* result_str = di_to_string(quotient, 10);
+    TEST_ASSERT_EQUAL_STRING("1000000000000000000", result_str);
+    
+    free(result_str);
+    di_release(&dividend);
+    di_release(&divisor);
+    di_release(&quotient);
+    
+    // Large number divided by small number: 999999999999999999999999999999 / 7 = 142857142857142857142857142857
+    di_int big_num = di_from_string("999999999999999999999999999999", 10);
+    di_int small_num = di_from_int32(7);
+    di_int big_quotient = di_divide(big_num, small_num);
+    
+    result_str = di_to_string(big_quotient, 10);
+    TEST_ASSERT_EQUAL_STRING("142857142857142857142857142857", result_str);
+    
+    free(result_str);
+    di_release(&big_num);
+    di_release(&small_num);
+    di_release(&big_quotient);
+}
+
+void test_large_modulo(void) {
+    // 999999999999999999999999999 % 123456789 = 93951369
+    di_int large_num = di_from_string("999999999999999999999999999", 10);
+    di_int modulus = di_from_int32(123456789);
+    di_int remainder = di_mod(large_num, modulus);
+    
+    TEST_ASSERT_NOT_NULL(remainder);
+    
+    char* result_str = di_to_string(remainder, 10);
+    TEST_ASSERT_EQUAL_STRING("93951369", result_str);
+    
+    free(result_str);
+    di_release(&large_num);
+    di_release(&modulus);
+    di_release(&remainder);
+    
+    // 888888888888888888888888888888 % 77777777 = 888888
+    di_int large_num2 = di_from_string("888888888888888888888888888888", 10);
+    di_int modulus2 = di_from_int32(77777777);
+    di_int remainder2 = di_mod(large_num2, modulus2);
+    
+    result_str = di_to_string(remainder2, 10);
+    TEST_ASSERT_EQUAL_STRING("888888", result_str);
+    
+    free(result_str);
+    di_release(&large_num2);
+    di_release(&modulus2);
+    di_release(&remainder2);
+}
+
+void test_large_factorial(void) {
+    // 30! = 265252859812191058636308480000000
+    di_int fact30 = di_factorial(30);
+    TEST_ASSERT_NOT_NULL(fact30);
+    
+    char* result_str = di_to_string(fact30, 10);
+    TEST_ASSERT_EQUAL_STRING("265252859812191058636308480000000", result_str);
+    
+    free(result_str);
+    di_release(&fact30);
+    
+    // 40! = 815915283247897734345611269596115894272000000000
+    di_int fact40 = di_factorial(40);
+    result_str = di_to_string(fact40, 10);
+    TEST_ASSERT_EQUAL_STRING("815915283247897734345611269596115894272000000000", result_str);
+    
+    free(result_str);
+    di_release(&fact40);
+}
+
+void test_mixed_large_small_operations(void) {
+    // Large number + small number
+    di_int large = di_from_string("123456789012345678901234567890", 10);
+    di_int sum = di_add_i32(large, 12345);
+    
+    char* result_str = di_to_string(sum, 10);
+    TEST_ASSERT_EQUAL_STRING("123456789012345678901234580235", result_str);
+    
+    free(result_str);
+    di_release(&sum);
+    
+    // Large number * small number
+    di_int product = di_mul_i32(large, 999);
+    result_str = di_to_string(product, 10);
+    TEST_ASSERT_EQUAL_STRING("123333332223333333222333333322110", result_str);
+    
+    free(result_str);
+    di_release(&large);
+    di_release(&product);
+    
+    // Chain operations: (large + small) - small should equal original
+    di_int num = di_from_string("987654321098765432109876543210", 10);
+    di_int temp = di_add_i32(num, 54321);
+    di_int result = di_sub_i32(temp, 54321);
+    
+    char* num_str = di_to_string(num, 10);
+    char* result_str2 = di_to_string(result, 10);
+    TEST_ASSERT_EQUAL_STRING(num_str, result_str2);
+    
+    free(num_str);
+    free(result_str2);
+    di_release(&num);
+    di_release(&temp);
+    di_release(&result);
+}
+
+void test_extreme_edge_cases(void) {
+    // Test with zero
+    di_int large = di_from_string("999999999999999999999999999999", 10);
+    di_int zero = di_zero();
+    
+    // Addition with zero
+    di_int sum_zero = di_add(large, zero);
+    char* large_str = di_to_string(large, 10);
+    char* sum_str = di_to_string(sum_zero, 10);
+    TEST_ASSERT_EQUAL_STRING(large_str, sum_str);
+    
+    free(large_str);
+    free(sum_str);
+    di_release(&sum_zero);
+    
+    // Multiplication with zero
+    di_int mult_zero = di_mul(large, zero);
+    TEST_ASSERT_TRUE(di_is_zero(mult_zero));
+    di_release(&mult_zero);
+    
+    // Test with one
+    di_int one = di_one();
+    di_int mult_one = di_mul(large, one);
+    large_str = di_to_string(large, 10);
+    char* mult_str = di_to_string(mult_one, 10);
+    TEST_ASSERT_EQUAL_STRING(large_str, mult_str);
+    
+    free(large_str);
+    free(mult_str);
+    di_release(&mult_one);
+    
+    // Test negative large numbers
+    di_int neg_large = di_negate(large);
+    TEST_ASSERT_TRUE(di_is_negative(neg_large));
+    
+    // Double negation should give original
+    di_int pos_again = di_negate(neg_large);
+    large_str = di_to_string(large, 10);
+    char* pos_str = di_to_string(pos_again, 10);
+    TEST_ASSERT_EQUAL_STRING(large_str, pos_str);
+    
+    free(large_str);
+    free(pos_str);
+    
+    di_release(&large);
+    di_release(&zero);
+    di_release(&one);
+    di_release(&neg_large);
+    di_release(&pos_again);
+}
+
+void test_string_conversion_large_numbers(void) {
+    // Test very large number string conversion
+    di_int huge = di_from_string("12345678901234567890123456789012345678901234567890123456789", 10);
+    TEST_ASSERT_NOT_NULL(huge);
+    
+    char* huge_str = di_to_string(huge, 10);
+    TEST_ASSERT_EQUAL_STRING("12345678901234567890123456789012345678901234567890123456789", huge_str);
+    
+    free(huge_str);
+    di_release(&huge);
+    
+    // Test parsing and conversion consistency
+    const char* test_numbers[] = {
+        "999999999999999999999",
+        "123456789123456789123456789",
+        "777777777777777777777777777777777",
+        "100000000000000000000000000000000000000"
+    };
+    
+    for (int i = 0; i < 4; i++) {
+        di_int num = di_from_string(test_numbers[i], 10);
+        TEST_ASSERT_NOT_NULL(num);
+        
+        char* converted = di_to_string(num, 10);
+        TEST_ASSERT_EQUAL_STRING(test_numbers[i], converted);
+        
+        free(converted);
+        di_release(&num);
+    }
+}
+
 int main(void) {
     UNITY_BEGIN();
     
@@ -1085,6 +1317,15 @@ int main(void) {
     
     // Utility function tests
     RUN_TEST(test_bit_length);
+    
+    // Large number tests
+    RUN_TEST(test_large_multiplication);
+    RUN_TEST(test_large_division);
+    RUN_TEST(test_large_modulo);
+    RUN_TEST(test_large_factorial);
+    RUN_TEST(test_mixed_large_small_operations);
+    RUN_TEST(test_extreme_edge_cases);
+    RUN_TEST(test_string_conversion_large_numbers);
     
     return UNITY_END();
 }
