@@ -388,26 +388,52 @@ DI_DEF di_int di_mul(di_int a, di_int b);
 DI_DEF di_int di_mul_i32(di_int a, int32_t b);
 
 /**
- * @brief Divide two integers (quotient)
- * @param a Dividend integer (may be NULL)
- * @param b Divisor integer (may be NULL)
- * @return New di_int with quotient of a / b, or NULL on failure or division by zero
+ * @brief Divide two integers using floor division
+ * @param a Dividend integer (must not be NULL)
+ * @param b Divisor integer (must not be NULL)
+ * @return New di_int with floor quotient of a / b
  * @since 1.0.0
  * 
- * @note Returns NULL if b is zero (division by zero)
- * @see di_mod() for remainder/modulo operation
+ * Uses floor division semantics where the result is rounded towards negative
+ * infinity, ensuring consistent behavior with signed operands.
+ * 
+ * @code
+ * di_int a = di_from_int32(-7);
+ * di_int b = di_from_int32(3);
+ * di_int quotient = di_div(a, b);    // Result: -3 (floor division)
+ * // Compare with C-style: -7/3 would be -2 (truncation towards zero)
+ * di_release(&a);
+ * di_release(&b);
+ * di_release(&quotient);
+ * @endcode
+ * 
+ * @note Asserts if a or b is NULL, or if b is zero
+ * @see di_mod() for remainder/modulo operation using floor division
  */
 DI_DEF di_int di_div(di_int a, di_int b);
 
 /**
- * @brief Get remainder of integer division
- * @param a Dividend integer (may be NULL)
- * @param b Divisor integer (may be NULL)
- * @return New di_int with remainder of a % b, or NULL on failure or division by zero
+ * @brief Get remainder of integer division using floor modulo
+ * @param a Dividend integer (must not be NULL)
+ * @param b Divisor integer (must not be NULL)
+ * @return New di_int with remainder of a % b where remainder has same sign as divisor
  * @since 1.0.0
  * 
- * @note Returns NULL if b is zero (division by zero)
- * @see di_div() for quotient
+ * Uses floor modulo semantics where the remainder always has the same sign as
+ * the divisor, consistent with floor division behavior.
+ * 
+ * @code
+ * di_int a = di_from_int32(-7);
+ * di_int b = di_from_int32(3);
+ * di_int remainder = di_mod(a, b);   // Result: 2 (positive, same sign as divisor)
+ * // Compare with C-style: -7%3 would be -1 (negative, same sign as dividend)
+ * di_release(&a);
+ * di_release(&b);
+ * di_release(&remainder);
+ * @endcode
+ * 
+ * @note Asserts if a or b is NULL, or if b is zero
+ * @see di_div() for quotient using floor division
  */
 DI_DEF di_int di_mod(di_int a, di_int b);
 
