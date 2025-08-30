@@ -92,7 +92,7 @@ gcc -std=c11 -Wall -Wextra main.c -o tests
 
 ### Arithmetic Operations
 
-- `di_add()`, `di_sub()`, `di_mul()` - Basic arithmetic
+- `di_add()`, `di_sub()`, `di_mul()`, `di_div()`, `di_mod()` - Basic arithmetic
 - `di_add_i32()`, `di_mul_i32()` - Mixed-type arithmetic
 - `di_negate()`, `di_abs()` - Unary operations
 - `di_pow()` - Exponentiation
