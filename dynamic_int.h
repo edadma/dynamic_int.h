@@ -397,7 +397,7 @@ DI_DEF di_int di_mul_i32(di_int a, int32_t b);
  * @note Returns NULL if b is zero (division by zero)
  * @see di_mod() for remainder/modulo operation
  */
-DI_DEF di_int di_divide(di_int a, di_int b);
+DI_DEF di_int di_div(di_int a, di_int b);
 
 /**
  * @brief Get remainder of integer division
@@ -407,7 +407,7 @@ DI_DEF di_int di_divide(di_int a, di_int b);
  * @since 1.0.0
  * 
  * @note Returns NULL if b is zero (division by zero)
- * @see di_divide() for quotient
+ * @see di_div() for quotient
  */
 DI_DEF di_int di_mod(di_int a, di_int b);
 
@@ -1433,7 +1433,8 @@ static int di_compare_magnitude(struct di_int_internal* a, struct di_int_interna
 /* Basic arithmetic implementations */
 
 DI_DEF di_int di_add(di_int a, di_int b) {
-    if (!a || !b) return NULL;
+    DI_ASSERT(a != NULL && "di_add: first operand cannot be NULL");
+    DI_ASSERT(b != NULL && "di_add: second operand cannot be NULL");
     
     // Simple implementation for same-sign addition
     if (a->is_negative == b->is_negative) {
@@ -1523,7 +1524,8 @@ DI_DEF di_int di_add_i32(di_int a, int32_t b) {
 }
 
 DI_DEF di_int di_sub(di_int a, di_int b) {
-    if (!a || !b) return NULL;
+    DI_ASSERT(a != NULL && "di_sub: first operand cannot be NULL");
+    DI_ASSERT(b != NULL && "di_sub: second operand cannot be NULL");
     
     // a - b = a + (-b)
     di_int neg_b = di_negate(b);
@@ -1601,7 +1603,7 @@ DI_DEF char* di_to_string(di_int big, int base) {
             return buffer;
         }
         
-        // Extract digits using limb-level division by 10 (much more efficient than di_divide)
+        // Extract digits using limb-level division by 10 (much more efficient than di_div)
         while (!di_is_zero(work)) {
             // Divide by 10 using limb arithmetic
             di_dlimb_t remainder = 0;
@@ -1713,7 +1715,8 @@ DI_DEF bool di_multiply_overflow_int64(int64_t a, int64_t b, int64_t* result) {
 
 // Big integer multiplication - use the original working approach for single limb case, full algorithm for multi-limb
 DI_DEF di_int di_mul(di_int a, di_int b) {
-    if (!a || !b) return NULL;
+    DI_ASSERT(a != NULL && "di_mul: first operand cannot be NULL");
+    DI_ASSERT(b != NULL && "di_mul: second operand cannot be NULL");
     
     // Handle zero cases
     if (a->limb_count == 0 || b->limb_count == 0) {
@@ -1795,9 +1798,10 @@ DI_DEF di_int di_mul_i32(di_int a, int32_t b) {
 }
 
 // Big integer division - returns quotient
-DI_DEF di_int di_divide(di_int a, di_int b) {
-    if (!a || !b) return NULL;
-    if (di_is_zero(b)) return NULL; // Division by zero
+DI_DEF di_int di_div(di_int a, di_int b) {
+    DI_ASSERT(a != NULL && "di_div: dividend cannot be NULL");
+    DI_ASSERT(b != NULL && "di_div: divisor cannot be NULL");
+    DI_ASSERT(!di_is_zero(b) && "di_div: division by zero");
     
     // Special cases
     if (di_is_zero(a)) return di_zero();
@@ -1839,9 +1843,20 @@ DI_DEF di_int di_divide(di_int a, di_int b) {
         
         di_normalize(quotient);
         
-        // Set result sign
+        // Set result sign and apply floor division semantics
         bool result_negative = (a->is_negative != b->is_negative);
-        if (result_negative && quotient->limb_count > 0) {
+        
+        // For floor division: if result would be negative and there's a remainder,
+        // we need to add 1 to the quotient magnitude (going more negative)
+        if (result_negative && remainder > 0 && quotient->limb_count > 0) {
+            // Add 1 to quotient magnitude for floor division
+            di_int one = di_one();
+            di_int adjusted_quotient = di_add(quotient, one);
+            di_release(&quotient);
+            di_release(&one);
+            quotient = adjusted_quotient;
+            quotient->is_negative = true;
+        } else if (result_negative && quotient->limb_count > 0) {
             quotient->is_negative = true;
         }
         
@@ -1894,8 +1909,21 @@ DI_DEF di_int di_divide(di_int a, di_int b) {
         }
     }
     
-    // Set result sign: negative if operands have different signs
+    // Implement floor division (Python-style)
     bool result_negative = (a->is_negative != b->is_negative);
+    
+    // For floor division: if result would be negative and there's a remainder,
+    // we need to add 1 to the magnitude of the quotient (since we're going more negative)
+    if (result_negative && !di_is_zero(remainder) && quotient->limb_count > 0) {
+        // Add 1 to quotient magnitude for floor division
+        di_int one = di_one();
+        di_int adjusted_quotient = di_add(quotient, one);
+        di_release(&quotient);
+        di_release(&one);
+        quotient = adjusted_quotient;
+    }
+    
+    // Set the sign
     if (result_negative && quotient->limb_count > 0) {
         quotient->is_negative = true;
     }
@@ -1909,48 +1937,20 @@ DI_DEF di_int di_divide(di_int a, di_int b) {
 
 // Big integer modulo - proper arbitrary precision implementation
 DI_DEF di_int di_mod(di_int a, di_int b) {
-    if (!a || !b) return NULL;
-    if (di_is_zero(b)) return NULL; // Division by zero
+    DI_ASSERT(a != NULL && "di_mod: dividend cannot be NULL");
+    DI_ASSERT(b != NULL && "di_mod: divisor cannot be NULL");
+    DI_ASSERT(!di_is_zero(b) && "di_mod: modulo by zero");
     
     // Special cases
     if (di_is_zero(a)) return di_zero(); // 0 % b = 0
     if (di_eq(a, b)) return di_zero();   // a % a = 0
     
-    // Compare absolute values
-    di_int abs_a = di_abs(a);
-    di_int abs_b = di_abs(b);
+    // For floor modulo: remainder = a - (floor(a/b) * b)
+    // This ensures the remainder has the same sign as the divisor
+    di_int quotient = di_div(a, b);  // Use floor division
+    di_int product = di_mul(quotient, b);
+    di_int remainder = di_sub(a, product);
     
-    // If |a| < |b|, then a % b = a (for positive numbers)
-    if (di_lt(abs_a, abs_b)) {
-        di_release(&abs_a);
-        di_release(&abs_b);
-        if (a->is_negative && b->is_negative) {
-            return di_negate(a);  // Both negative: result is negative
-        } else if (a->is_negative && !b->is_negative) {
-            // a is negative, b is positive: a % b = b - |a|
-            di_int neg_a = di_negate(a);
-            di_int result = di_sub(b, neg_a);
-            di_release(&neg_a);
-            return result;
-        } else {
-            return di_copy(a);    // Normal case: a % b = a when |a| < |b|
-        }
-    }
-    
-    // Use division to compute remainder: a % b = a - (a / b) * b
-    di_int quotient = di_divide(abs_a, abs_b);
-    di_int product = di_mul(quotient, abs_b);
-    di_int remainder = di_sub(abs_a, product);
-    
-    // Handle sign of remainder based on dividend sign
-    if (a->is_negative && !di_is_zero(remainder)) {
-        di_int neg_remainder = di_negate(remainder);
-        di_release(&remainder);
-        remainder = neg_remainder;
-    }
-    
-    di_release(&abs_a);
-    di_release(&abs_b);
     di_release(&quotient);
     di_release(&product);
     
@@ -2197,7 +2197,7 @@ DI_DEF di_int di_lcm(di_int a, di_int b) {
         return NULL;
     }
     
-    di_int result = di_divide(abs_product, gcd);
+    di_int result = di_div(abs_product, gcd);
     di_release(&abs_product);
     di_release(&gcd);
     
@@ -2218,7 +2218,7 @@ DI_DEF di_int di_sqrt(di_int n) {
     
     // Initial guess: x = n / 2
     di_int two = di_from_int32(2);
-    di_int x = di_divide(n, two);
+    di_int x = di_div(n, two);
     if (!x) {
         di_release(&one);
         di_release(&two);
@@ -2227,14 +2227,14 @@ DI_DEF di_int di_sqrt(di_int n) {
     
     // Newton's method: x_new = (x + n/x) / 2
     for (int iterations = 0; iterations < 100; iterations++) { // Limit iterations
-        di_int quotient = di_divide(n, x);
+        di_int quotient = di_div(n, x);
         if (!quotient) break;
         
         di_int sum = di_add(x, quotient);
         di_release(&quotient);
         if (!sum) break;
         
-        di_int x_new = di_divide(sum, two);
+        di_int x_new = di_div(sum, two);
         di_release(&sum);
         if (!x_new) break;
         
@@ -2324,7 +2324,7 @@ DI_DEF di_int di_mod_pow(di_int base, di_int exp, di_int mod) {
         }
         
         di_int two = di_from_int32(2);
-        di_int new_exp = di_divide(exp_copy, two);
+        di_int new_exp = di_div(exp_copy, two);
         di_release(&two);
         di_release(&exp_copy);
         exp_copy = new_exp;
@@ -2540,7 +2540,7 @@ DI_DEF di_int di_extended_gcd(di_int a, di_int b, di_int* x, di_int* y) {
     }
     
     while (!di_is_zero(r)) {
-        di_int quotient = di_divide(old_r, r);
+        di_int quotient = di_div(old_r, r);
         if (!quotient) break;
         
         // (old_r, r) := (r, old_r - quotient * r)

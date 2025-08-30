@@ -608,7 +608,7 @@ void test_from_string_zero(void) {
 void test_divide_basic(void) {
     di_int a = di_from_int32(42);
     di_int b = di_from_int32(6);
-    di_int quotient = di_divide(a, b);
+    di_int quotient = di_div(a, b);
     
     TEST_ASSERT_NOT_NULL(quotient);
     
@@ -624,7 +624,7 @@ void test_divide_basic(void) {
 void test_divide_with_remainder(void) {
     di_int a = di_from_int32(17);
     di_int b = di_from_int32(5);
-    di_int quotient = di_divide(a, b);
+    di_int quotient = di_div(a, b);
     
     TEST_ASSERT_NOT_NULL(quotient);
     
@@ -640,7 +640,7 @@ void test_divide_with_remainder(void) {
 void test_divide_negative(void) {
     di_int a = di_from_int32(-20);
     di_int b = di_from_int32(4);
-    di_int quotient = di_divide(a, b);
+    di_int quotient = di_div(a, b);
     
     TEST_ASSERT_NOT_NULL(quotient);
     TEST_ASSERT_TRUE(di_is_negative(quotient));
@@ -1006,7 +1006,7 @@ void test_large_division(void) {
     // 999999999999999999888888888888888888 / 999999999999999999 = 1000000000000000000
     di_int dividend = di_from_string("999999999999999999888888888888888888", 10);
     di_int divisor = di_from_string("999999999999999999", 10);
-    di_int quotient = di_divide(dividend, divisor);
+    di_int quotient = di_div(dividend, divisor);
     
     TEST_ASSERT_NOT_NULL(quotient);
     
@@ -1021,7 +1021,7 @@ void test_large_division(void) {
     // Large number divided by small number: 999999999999999999999999999999 / 7 = 142857142857142857142857142857
     di_int big_num = di_from_string("999999999999999999999999999999", 10);
     di_int small_num = di_from_int32(7);
-    di_int big_quotient = di_divide(big_num, small_num);
+    di_int big_quotient = di_div(big_num, small_num);
     
     result_str = di_to_string(big_quotient, 10);
     TEST_ASSERT_EQUAL_STRING("142857142857142857142857142857", result_str);
@@ -1200,6 +1200,198 @@ void test_string_conversion_large_numbers(void) {
     }
 }
 
+// Large negative number tests
+void test_large_negative_multiplication(void) {
+    // Large negative * large positive = large negative
+    // -999999999999999999 * 888888888888888888 = -888888888888888887111111111111111112
+    di_int neg_a = di_from_string("-999999999999999999", 10);
+    di_int pos_b = di_from_string("888888888888888888", 10);
+    di_int product1 = di_mul(neg_a, pos_b);
+    
+    TEST_ASSERT_NOT_NULL(product1);
+    TEST_ASSERT_TRUE(di_is_negative(product1));
+    
+    char* result_str = di_to_string(product1, 10);
+    TEST_ASSERT_EQUAL_STRING("-888888888888888887111111111111111112", result_str);
+    free(result_str);
+    
+    di_release(&neg_a);
+    di_release(&pos_b);
+    di_release(&product1);
+    
+    // Large negative * large negative = large positive
+    // -123456789012345 * -987654321098765 = 121932631137021071359549253925
+    di_int neg_c = di_from_string("-123456789012345", 10);
+    di_int neg_d = di_from_string("-987654321098765", 10);
+    di_int product2 = di_mul(neg_c, neg_d);
+    
+    TEST_ASSERT_NOT_NULL(product2);
+    TEST_ASSERT_TRUE(di_is_positive(product2));
+    
+    result_str = di_to_string(product2, 10);
+    TEST_ASSERT_EQUAL_STRING("121932631137021071359549253925", result_str);
+    free(result_str);
+    
+    di_release(&neg_c);
+    di_release(&neg_d);
+    di_release(&product2);
+    
+    // Large positive * large negative = large negative
+    di_int pos_e = di_from_string("777777777777777777777", 10);
+    di_int neg_f = di_from_string("-333333333333333333333", 10);
+    di_int product3 = di_mul(pos_e, neg_f);
+    
+    TEST_ASSERT_TRUE(di_is_negative(product3));
+    
+    result_str = di_to_string(product3, 10);
+    TEST_ASSERT_EQUAL_STRING("-259259259259259259258740740740740740740741", result_str);
+    free(result_str);
+    
+    di_release(&pos_e);
+    di_release(&neg_f);
+    di_release(&product3);
+}
+
+void test_large_negative_division(void) {
+    // Large negative / large positive = negative (Python-style floor division)
+    // -999999999999999999888888888888888888 / 999999999999999999 = -1000000000000000001
+    di_int neg_dividend = di_from_string("-999999999999999999888888888888888888", 10);
+    di_int pos_divisor = di_from_string("999999999999999999", 10);
+    di_int quotient1 = di_div(neg_dividend, pos_divisor);
+    
+    TEST_ASSERT_NOT_NULL(quotient1);
+    TEST_ASSERT_TRUE(di_is_negative(quotient1));
+    
+    char* result_str = di_to_string(quotient1, 10);
+    TEST_ASSERT_EQUAL_STRING("-1000000000000000001", result_str);
+    free(result_str);
+    
+    di_release(&neg_dividend);
+    di_release(&pos_divisor);
+    di_release(&quotient1);
+    
+    // Large negative / large negative = positive
+    di_int neg_dividend2 = di_from_string("-121932631137021795047325102881054275", 10);
+    di_int neg_divisor2 = di_from_string("-123456789012345", 10);
+    di_int quotient2 = di_div(neg_dividend2, neg_divisor2);
+    
+    TEST_ASSERT_TRUE(di_is_positive(quotient2));
+    
+    result_str = di_to_string(quotient2, 10);
+    TEST_ASSERT_EQUAL_STRING("987654321098770861871", result_str);
+    free(result_str);
+    
+    di_release(&neg_dividend2);
+    di_release(&neg_divisor2);
+    di_release(&quotient2);
+    
+    // Large positive / large negative = negative
+    di_int pos_dividend = di_from_string("999999999999999999999999999999", 10);
+    di_int neg_divisor3 = di_from_int32(-7);
+    di_int quotient3 = di_div(pos_dividend, neg_divisor3);
+    
+    TEST_ASSERT_TRUE(di_is_negative(quotient3));
+    
+    result_str = di_to_string(quotient3, 10);
+    TEST_ASSERT_EQUAL_STRING("-142857142857142857142857142857", result_str);
+    free(result_str);
+    
+    di_release(&pos_dividend);
+    di_release(&neg_divisor3);
+    di_release(&quotient3);
+}
+
+void test_large_negative_modulo(void) {
+    // Large negative % positive modulus (Python-style: result has sign of divisor)  
+    // -999999999999999999999999999 % 123456789 = 29505420
+    di_int neg_large = di_from_string("-999999999999999999999999999", 10);
+    di_int pos_modulus = di_from_int32(123456789);
+    di_int remainder1 = di_mod(neg_large, pos_modulus);
+    
+    TEST_ASSERT_NOT_NULL(remainder1);
+    
+    char* result_str = di_to_string(remainder1, 10);
+    TEST_ASSERT_EQUAL_STRING("29505420", result_str);
+    free(result_str);
+    
+    di_release(&neg_large);
+    di_release(&pos_modulus);
+    di_release(&remainder1);
+    
+    // Large negative % negative modulus
+    di_int neg_large2 = di_from_string("-888888888888888888888888888888", 10);
+    di_int neg_modulus = di_from_int32(-77777777);
+    di_int remainder2 = di_mod(neg_large2, neg_modulus);
+    
+    result_str = di_to_string(remainder2, 10);
+    TEST_ASSERT_EQUAL_STRING("-888888", result_str);
+    free(result_str);
+    
+    di_release(&neg_large2);
+    di_release(&neg_modulus);
+    di_release(&remainder2);
+    
+    // Large positive % negative modulus (Python-style: result has sign of divisor)
+    di_int pos_large = di_from_string("555555555555555555555555555", 10);
+    di_int neg_mod = di_from_int32(-999999);
+    di_int remainder3 = di_mod(pos_large, neg_mod);
+    
+    result_str = di_to_string(remainder3, 10);
+    TEST_ASSERT_EQUAL_STRING("-777222", result_str);
+    free(result_str);
+    
+    di_release(&pos_large);
+    di_release(&neg_mod);
+    di_release(&remainder3);
+}
+
+void test_mixed_large_negative_operations(void) {
+    // Test chain of operations with mixed signs
+    di_int large_pos = di_from_string("123456789012345678901234567890", 10);
+    di_int large_neg = di_negate(large_pos);
+    
+    // Test that negation works correctly
+    TEST_ASSERT_TRUE(di_is_negative(large_neg));
+    char* neg_str = di_to_string(large_neg, 10);
+    TEST_ASSERT_EQUAL_STRING("-123456789012345678901234567890", neg_str);
+    free(neg_str);
+    
+    // Test large negative + small positive
+    di_int sum1 = di_add_i32(large_neg, 12345);
+    char* sum1_str = di_to_string(sum1, 10);
+    TEST_ASSERT_EQUAL_STRING("-123456789012345678901234555545", sum1_str);
+    free(sum1_str);
+    
+    // Test large negative - small positive (should be more negative)
+    di_int diff1 = di_sub_i32(large_neg, 54321);
+    char* diff1_str = di_to_string(diff1, 10);
+    TEST_ASSERT_EQUAL_STRING("-123456789012345678901234622211", diff1_str);
+    free(diff1_str);
+    
+    // Test large negative * small negative = large positive
+    di_int prod1 = di_mul_i32(large_neg, -2);
+    TEST_ASSERT_TRUE(di_is_positive(prod1));
+    char* prod1_str = di_to_string(prod1, 10);
+    TEST_ASSERT_EQUAL_STRING("246913578024691357802469135780", prod1_str);
+    free(prod1_str);
+    
+    // Test absolute value of large negative
+    di_int abs_val = di_abs(large_neg);
+    TEST_ASSERT_TRUE(di_is_positive(abs_val));
+    char* abs_str = di_to_string(abs_val, 10);
+    char* pos_str = di_to_string(large_pos, 10);
+    TEST_ASSERT_EQUAL_STRING(pos_str, abs_str);
+    free(abs_str);
+    free(pos_str);
+    
+    di_release(&large_pos);
+    di_release(&large_neg);
+    di_release(&sum1);
+    di_release(&diff1);
+    di_release(&prod1);
+    di_release(&abs_val);
+}
+
 int main(void) {
     UNITY_BEGIN();
     
@@ -1326,6 +1518,12 @@ int main(void) {
     RUN_TEST(test_mixed_large_small_operations);
     RUN_TEST(test_extreme_edge_cases);
     RUN_TEST(test_string_conversion_large_numbers);
+    
+    // Large negative number tests
+    RUN_TEST(test_large_negative_multiplication);
+    RUN_TEST(test_large_negative_division);
+    RUN_TEST(test_large_negative_modulo);
+    RUN_TEST(test_mixed_large_negative_operations);
     
     return UNITY_END();
 }
