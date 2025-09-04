@@ -1,6 +1,6 @@
 # dynamic_int.h
 
-[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/edadma/dynamic_int.h/releases)
+[![Version](https://img.shields.io/badge/version-v1.1.0-blue.svg)](https://github.com/edadma/dynamic_int.h/releases)
 [![Language](https://img.shields.io/badge/language-C11-blue.svg)](https://en.cppreference.com/w/c/11)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Unlicense-green.svg)](#license)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS%20%7C%20MCU-lightgrey.svg)](#platform-support)
@@ -138,6 +138,15 @@ This library supports:
 - **MCU**: Designed for microcontroller environments
 
 ## Version History
+
+### v1.1.0 (September 2025)
+- ✅ **Complete conversion API**: Added missing `di_to_uint32()` and `di_to_uint64()` implementations
+- ✅ **Enhanced type safety**: Proper range checking and negative value rejection for unsigned conversions
+- ✅ **Comprehensive testing**: 12 new unit tests covering all conversion edge cases
+- ✅ **API completeness**: All declared conversion functions now fully implemented
+- ✅ **Overflow detection**: Safe handling of values exceeding target type ranges
+- ✅ **NULL safety**: Robust error handling for invalid input parameters
+- ✅ **Test coverage expansion**: Total test count increased to 92 tests with 0 failures
 
 ### v1.0.0 (August 2025)
 - ✅ **Complete arithmetic implementation**: Full arbitrary precision multiplication, division, modulo

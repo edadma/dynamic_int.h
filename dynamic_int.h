@@ -1,7 +1,7 @@
 /**
  * @file dynamic_int.h
  * @brief Reference-counted arbitrary precision integer library
- * @version 1.0.0
+ * @version 1.1.0
  * @date August 2025
  *
  * Single header library for arbitrary precision integers with reference counting.
