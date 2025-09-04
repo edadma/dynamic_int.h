@@ -74,6 +74,97 @@ void test_to_int32_zero(void) {
     di_release(&zero);
 }
 
+// Unsigned conversion tests
+void test_to_uint32_basic(void) {
+    di_int a = di_from_int32(123);
+    uint32_t result;
+    TEST_ASSERT_TRUE(di_to_uint32(a, &result));
+    TEST_ASSERT_EQUAL_UINT32(123, result);
+    di_release(&a);
+}
+
+void test_to_uint32_zero(void) {
+    di_int zero = di_zero();
+    uint32_t result;
+    TEST_ASSERT_TRUE(di_to_uint32(zero, &result));
+    TEST_ASSERT_EQUAL_UINT32(0, result);
+    di_release(&zero);
+}
+
+void test_to_uint32_max(void) {
+    di_int a = di_from_uint64(UINT32_MAX);
+    uint32_t result;
+    TEST_ASSERT_TRUE(di_to_uint32(a, &result));
+    TEST_ASSERT_EQUAL_UINT32(UINT32_MAX, result);
+    di_release(&a);
+}
+
+void test_to_uint32_negative_fails(void) {
+    di_int a = di_from_int32(-123);
+    uint32_t result;
+    TEST_ASSERT_FALSE(di_to_uint32(a, &result));
+    di_release(&a);
+}
+
+void test_to_uint32_overflow_fails(void) {
+    di_int a = di_from_uint64((uint64_t)UINT32_MAX + 1);
+    uint32_t result;
+    TEST_ASSERT_FALSE(di_to_uint32(a, &result));
+    di_release(&a);
+}
+
+void test_to_uint32_null_fails(void) {
+    uint32_t result;
+    TEST_ASSERT_FALSE(di_to_uint32(NULL, &result));
+    TEST_ASSERT_FALSE(di_to_uint32(di_from_int32(42), NULL));
+}
+
+void test_to_uint64_basic(void) {
+    di_int a = di_from_int32(123);
+    uint64_t result;
+    TEST_ASSERT_TRUE(di_to_uint64(a, &result));
+    TEST_ASSERT_EQUAL_UINT64(123, result);
+    di_release(&a);
+}
+
+void test_to_uint64_zero(void) {
+    di_int zero = di_zero();
+    uint64_t result;
+    TEST_ASSERT_TRUE(di_to_uint64(zero, &result));
+    TEST_ASSERT_EQUAL_UINT64(0, result);
+    di_release(&zero);
+}
+
+void test_to_uint64_max_uint32(void) {
+    di_int a = di_from_uint64(UINT32_MAX);
+    uint64_t result;
+    TEST_ASSERT_TRUE(di_to_uint64(a, &result));
+    TEST_ASSERT_EQUAL_UINT64(UINT32_MAX, result);
+    di_release(&a);
+}
+
+void test_to_uint64_large_value(void) {
+    uint64_t expected = 0x123456789ABCDEFULL;
+    di_int a = di_from_uint64(expected);
+    uint64_t result;
+    TEST_ASSERT_TRUE(di_to_uint64(a, &result));
+    TEST_ASSERT_EQUAL_UINT64(expected, result);
+    di_release(&a);
+}
+
+void test_to_uint64_negative_fails(void) {
+    di_int a = di_from_int32(-123);
+    uint64_t result;
+    TEST_ASSERT_FALSE(di_to_uint64(a, &result));
+    di_release(&a);
+}
+
+void test_to_uint64_null_fails(void) {
+    uint64_t result;
+    TEST_ASSERT_FALSE(di_to_uint64(NULL, &result));
+    TEST_ASSERT_FALSE(di_to_uint64(di_from_int32(42), NULL));
+}
+
 // Reference counting tests
 void test_reference_counting(void) {
     di_int a = di_from_int32(42);
@@ -1405,6 +1496,20 @@ int main(void) {
     RUN_TEST(test_to_int32_basic);
     RUN_TEST(test_to_int32_negative);
     RUN_TEST(test_to_int32_zero);
+    
+    // Unsigned conversion tests
+    RUN_TEST(test_to_uint32_basic);
+    RUN_TEST(test_to_uint32_zero);
+    RUN_TEST(test_to_uint32_max);
+    RUN_TEST(test_to_uint32_negative_fails);
+    RUN_TEST(test_to_uint32_overflow_fails);
+    RUN_TEST(test_to_uint32_null_fails);
+    RUN_TEST(test_to_uint64_basic);
+    RUN_TEST(test_to_uint64_zero);
+    RUN_TEST(test_to_uint64_max_uint32);
+    RUN_TEST(test_to_uint64_large_value);
+    RUN_TEST(test_to_uint64_negative_fails);
+    RUN_TEST(test_to_uint64_null_fails);
     
     // Reference counting tests
     RUN_TEST(test_reference_counting);
