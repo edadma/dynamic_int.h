@@ -77,8 +77,10 @@
 // API macros
 #ifdef DI_STATIC
 #define DI_DEF static
+#define DI_IMPL static
 #else
 #define DI_DEF extern
+#define DI_IMPL /* nothing - default linkage */
 #endif
 
 #if DI_LIMB_BITS == 32
@@ -1059,7 +1061,7 @@ static void di_normalize(struct di_int_internal* big) {
     }
 }
 
-DI_DEF bool di_reserve(di_int big, size_t capacity) {
+DI_IMPL bool di_reserve(di_int big, size_t capacity) {
     if (!big) return false;
 
     di_resize_internal(big, capacity);
@@ -1081,7 +1083,7 @@ static void di_resize_internal(struct di_int_internal* big, size_t new_capacity)
 
 /* Creation functions */
 
-DI_DEF di_int di_from_int32(int32_t value) {
+DI_IMPL di_int di_from_int32(int32_t value) {
     struct di_int_internal* big = di_alloc(1);
     if (!big) return NULL;
     
@@ -1101,7 +1103,7 @@ DI_DEF di_int di_from_int32(int32_t value) {
     return big;
 }
 
-DI_DEF di_int di_from_int64(int64_t value) {
+DI_IMPL di_int di_from_int64(int64_t value) {
     struct di_int_internal* big = di_alloc(2);
     if (!big) return NULL;
     
@@ -1129,7 +1131,7 @@ DI_DEF di_int di_from_int64(int64_t value) {
     return big;
 }
 
-DI_DEF di_int di_from_uint32(uint32_t value) {
+DI_IMPL di_int di_from_uint32(uint32_t value) {
     struct di_int_internal* big = di_alloc(1);
     if (!big) return NULL;
     
@@ -1140,7 +1142,7 @@ DI_DEF di_int di_from_uint32(uint32_t value) {
     return big;
 }
 
-DI_DEF di_int di_from_uint64(uint64_t value) {
+DI_IMPL di_int di_from_uint64(uint64_t value) {
     struct di_int_internal* big = di_alloc(2);
     if (!big) return NULL;
     
@@ -1153,15 +1155,15 @@ DI_DEF di_int di_from_uint64(uint64_t value) {
     return big;
 }
 
-DI_DEF di_int di_zero(void) {
+DI_IMPL di_int di_zero(void) {
     return di_from_int32(0);
 }
 
-DI_DEF di_int di_one(void) {
+DI_IMPL di_int di_one(void) {
     return di_from_int32(1);
 }
 
-DI_DEF di_int di_copy(di_int big) {
+DI_IMPL di_int di_copy(di_int big) {
     DI_ASSERT(big && "di_copy: operand cannot be NULL");
 
     struct di_int_internal* copy = di_alloc(big->limb_capacity);
@@ -1175,7 +1177,7 @@ DI_DEF di_int di_copy(di_int big) {
     return copy;
 }
 
-DI_DEF di_int di_from_string(const char* str, int base) {
+DI_IMPL di_int di_from_string(const char* str, int base) {
     if (!str || base < 2 || base > 36) return NULL;
     
     // Skip whitespace
@@ -1289,13 +1291,13 @@ DI_DEF di_int di_from_string(const char* str, int base) {
 
 /* Reference counting */
 
-DI_DEF di_int di_retain(di_int big) {
+DI_IMPL di_int di_retain(di_int big) {
     DI_ASSERT(big && "di_retain: operand cannot be NULL");
     big->ref_count++;
     return big;
 }
 
-DI_DEF void di_release(di_int* big) {
+DI_IMPL void di_release(di_int* big) {
     if (!big || !*big) return;
     
     struct di_int_internal* b = *big;
@@ -1308,13 +1310,13 @@ DI_DEF void di_release(di_int* big) {
     *big = NULL;
 }
 
-DI_DEF size_t di_ref_count(di_int big) {
+DI_IMPL size_t di_ref_count(di_int big) {
     return big ? big->ref_count : 0;
 }
 
 /* Comparison functions */
 
-DI_DEF int di_compare(di_int a, di_int b) {
+DI_IMPL int di_compare(di_int a, di_int b) {
     DI_ASSERT(a && "di_compare: first operand cannot be NULL");
     DI_ASSERT(b && "di_compare: second operand cannot be NULL");
     
@@ -1342,42 +1344,42 @@ DI_DEF int di_compare(di_int a, di_int b) {
     return 0;  // Equal
 }
 
-DI_DEF bool di_eq(di_int a, di_int b) {
+DI_IMPL bool di_eq(di_int a, di_int b) {
     return di_compare(a, b) == 0;
 }
 
-DI_DEF bool di_lt(di_int a, di_int b) {
+DI_IMPL bool di_lt(di_int a, di_int b) {
     return di_compare(a, b) < 0;
 }
 
-DI_DEF bool di_le(di_int a, di_int b) {
+DI_IMPL bool di_le(di_int a, di_int b) {
     return di_compare(a, b) <= 0;
 }
 
-DI_DEF bool di_gt(di_int a, di_int b) {
+DI_IMPL bool di_gt(di_int a, di_int b) {
     return di_compare(a, b) > 0;
 }
 
-DI_DEF bool di_ge(di_int a, di_int b) {
+DI_IMPL bool di_ge(di_int a, di_int b) {
     return di_compare(a, b) >= 0;
 }
 
-DI_DEF bool di_is_zero(di_int big) {
+DI_IMPL bool di_is_zero(di_int big) {
     DI_ASSERT(big && "di_is_zero: operand cannot be NULL");
     return big->limb_count == 0;
 }
 
-DI_DEF bool di_is_negative(di_int big) {
+DI_IMPL bool di_is_negative(di_int big) {
     DI_ASSERT(big && "di_is_negative: operand cannot be NULL");
     return big->is_negative && big->limb_count > 0;
 }
 
-DI_DEF bool di_is_positive(di_int big) {
+DI_IMPL bool di_is_positive(di_int big) {
     DI_ASSERT(big && "di_is_positive: operand cannot be NULL");
     return !big->is_negative && big->limb_count > 0;
 }
 
-DI_DEF bool di_is_one(di_int big) {
+DI_IMPL bool di_is_one(di_int big) {
     DI_ASSERT(big && "di_is_one: operand cannot be NULL");
     if (big->is_negative || big->limb_count != 1) {
         return false;
@@ -1387,7 +1389,7 @@ DI_DEF bool di_is_one(di_int big) {
 
 /* Conversion functions */
 
-DI_DEF bool di_to_int32(di_int big, int32_t* result) {
+DI_IMPL bool di_to_int32(di_int big, int32_t* result) {
     DI_ASSERT(big && "di_to_int32: integer cannot be NULL");
     DI_ASSERT(result && "di_to_int32: result pointer cannot be NULL");
     
@@ -1415,7 +1417,7 @@ DI_DEF bool di_to_int32(di_int big, int32_t* result) {
     return true;
 }
 
-DI_DEF bool di_to_int64(di_int big, int64_t* result) {
+DI_IMPL bool di_to_int64(di_int big, int64_t* result) {
     if (!big || !result) return false;
     
     if (big->limb_count == 0) {
@@ -1445,7 +1447,7 @@ DI_DEF bool di_to_int64(di_int big, int64_t* result) {
     return true;
 }
 
-DI_DEF bool di_to_uint32(di_int big, uint32_t* result) {
+DI_IMPL bool di_to_uint32(di_int big, uint32_t* result) {
     if (!big || !result) return false;
     
     if (big->limb_count == 0) {
@@ -1474,7 +1476,7 @@ DI_DEF bool di_to_uint32(di_int big, uint32_t* result) {
     return true;
 }
 
-DI_DEF bool di_to_uint64(di_int big, uint64_t* result) {
+DI_IMPL bool di_to_uint64(di_int big, uint64_t* result) {
     if (!big || !result) return false;
     
     if (big->limb_count == 0) {
@@ -1497,7 +1499,7 @@ DI_DEF bool di_to_uint64(di_int big, uint64_t* result) {
     return true;
 }
 
-DI_DEF double di_to_double(di_int big) {
+DI_IMPL double di_to_double(di_int big) {
     if (!big || big->limb_count == 0) return 0.0;
     
     double result = 0.0;
@@ -1528,7 +1530,7 @@ static int di_compare_magnitude(struct di_int_internal* a, struct di_int_interna
 
 /* Basic arithmetic implementations */
 
-DI_DEF di_int di_add(di_int a, di_int b) {
+DI_IMPL di_int di_add(di_int a, di_int b) {
     DI_ASSERT(a != NULL && "di_add: first operand cannot be NULL");
     DI_ASSERT(b != NULL && "di_add: second operand cannot be NULL");
     
@@ -1607,7 +1609,7 @@ DI_DEF di_int di_add(di_int a, di_int b) {
     return result;
 }
 
-DI_DEF di_int di_add_i32(di_int a, int32_t b) {
+DI_IMPL di_int di_add_i32(di_int a, int32_t b) {
     if (!a) return NULL;
     
     // Convert int32 to big integer and use regular addition
@@ -1619,7 +1621,7 @@ DI_DEF di_int di_add_i32(di_int a, int32_t b) {
     return result;
 }
 
-DI_DEF di_int di_sub(di_int a, di_int b) {
+DI_IMPL di_int di_sub(di_int a, di_int b) {
     DI_ASSERT(a != NULL && "di_sub: first operand cannot be NULL");
     DI_ASSERT(b != NULL && "di_sub: second operand cannot be NULL");
     
@@ -1632,7 +1634,7 @@ DI_DEF di_int di_sub(di_int a, di_int b) {
     return result;
 }
 
-DI_DEF di_int di_sub_i32(di_int a, int32_t b) {
+DI_IMPL di_int di_sub_i32(di_int a, int32_t b) {
     if (!a) return NULL;
     
     // Convert int32 to big integer and use regular subtraction
@@ -1644,7 +1646,7 @@ DI_DEF di_int di_sub_i32(di_int a, int32_t b) {
     return result;
 }
 
-DI_DEF di_int di_negate(di_int a) {
+DI_IMPL di_int di_negate(di_int a) {
     if (!a) return NULL;
     
     di_int result = di_copy(a);
@@ -1655,7 +1657,7 @@ DI_DEF di_int di_negate(di_int a) {
 }
 
 /* String conversion implementation */
-DI_DEF char* di_to_string(di_int big, int base) {
+DI_IMPL char* di_to_string(di_int big, int base) {
     if (!big || base < 2 || base > 36) return NULL;
     
     if (big->limb_count == 0) {
@@ -1731,7 +1733,7 @@ DI_DEF char* di_to_string(di_int big, int base) {
 
 /* Overflow detection helpers */
 
-DI_DEF bool di_add_overflow_int32(int32_t a, int32_t b, int32_t* result) {
+DI_IMPL bool di_add_overflow_int32(int32_t a, int32_t b, int32_t* result) {
     int64_t sum = (int64_t)a + (int64_t)b;
     if (sum < INT32_MIN || sum > INT32_MAX) {
         return false;  // Overflow
@@ -1740,7 +1742,7 @@ DI_DEF bool di_add_overflow_int32(int32_t a, int32_t b, int32_t* result) {
     return true;
 }
 
-DI_DEF bool di_subtract_overflow_int32(int32_t a, int32_t b, int32_t* result) {
+DI_IMPL bool di_subtract_overflow_int32(int32_t a, int32_t b, int32_t* result) {
     int64_t diff = (int64_t)a - (int64_t)b;
     if (diff < INT32_MIN || diff > INT32_MAX) {
         return false;  // Overflow
@@ -1749,7 +1751,7 @@ DI_DEF bool di_subtract_overflow_int32(int32_t a, int32_t b, int32_t* result) {
     return true;
 }
 
-DI_DEF bool di_multiply_overflow_int32(int32_t a, int32_t b, int32_t* result) {
+DI_IMPL bool di_multiply_overflow_int32(int32_t a, int32_t b, int32_t* result) {
     int64_t prod = (int64_t)a * (int64_t)b;
     if (prod < INT32_MIN || prod > INT32_MAX) {
         return false;  // Overflow
@@ -1758,7 +1760,7 @@ DI_DEF bool di_multiply_overflow_int32(int32_t a, int32_t b, int32_t* result) {
     return true;
 }
 
-DI_DEF bool di_add_overflow_int64(int64_t a, int64_t b, int64_t* result) {
+DI_IMPL bool di_add_overflow_int64(int64_t a, int64_t b, int64_t* result) {
     // Check for overflow without causing UB
     if (b > 0 && a > INT64_MAX - b) return false;
     if (b < 0 && a < INT64_MIN - b) return false;
@@ -1766,7 +1768,7 @@ DI_DEF bool di_add_overflow_int64(int64_t a, int64_t b, int64_t* result) {
     return true;
 }
 
-DI_DEF bool di_subtract_overflow_int64(int64_t a, int64_t b, int64_t* result) {
+DI_IMPL bool di_subtract_overflow_int64(int64_t a, int64_t b, int64_t* result) {
     // Check for overflow without causing UB
     if (b < 0 && a > INT64_MAX + b) return false;
     if (b > 0 && a < INT64_MIN + b) return false;
@@ -1774,7 +1776,7 @@ DI_DEF bool di_subtract_overflow_int64(int64_t a, int64_t b, int64_t* result) {
     return true;
 }
 
-DI_DEF bool di_multiply_overflow_int64(int64_t a, int64_t b, int64_t* result) {
+DI_IMPL bool di_multiply_overflow_int64(int64_t a, int64_t b, int64_t* result) {
     // Check for overflow - this is complex for 64-bit
     if (a == 0 || b == 0) {
         *result = 0;
@@ -1801,7 +1803,7 @@ DI_DEF bool di_multiply_overflow_int64(int64_t a, int64_t b, int64_t* result) {
 }
 
 // Big integer multiplication - use the original working approach for single limb case, full algorithm for multi-limb
-DI_DEF di_int di_mul(di_int a, di_int b) {
+DI_IMPL di_int di_mul(di_int a, di_int b) {
     DI_ASSERT(a != NULL && "di_mul: first operand cannot be NULL");
     DI_ASSERT(b != NULL && "di_mul: second operand cannot be NULL");
     
@@ -1875,7 +1877,7 @@ DI_DEF di_int di_mul(di_int a, di_int b) {
 }
 
 // Big integer multiplication by int32
-DI_DEF di_int di_mul_i32(di_int a, int32_t b) {
+DI_IMPL di_int di_mul_i32(di_int a, int32_t b) {
     if (!a) return NULL;
     
     di_int b_big = di_from_int32(b);
@@ -1885,7 +1887,7 @@ DI_DEF di_int di_mul_i32(di_int a, int32_t b) {
 }
 
 // Big integer division - returns quotient
-DI_DEF di_int di_div(di_int a, di_int b) {
+DI_IMPL di_int di_div(di_int a, di_int b) {
     DI_ASSERT(a != NULL && "di_div: dividend cannot be NULL");
     DI_ASSERT(b != NULL && "di_div: divisor cannot be NULL");
     DI_ASSERT(!di_is_zero(b) && "di_div: division by zero");
@@ -2023,7 +2025,7 @@ DI_DEF di_int di_div(di_int a, di_int b) {
 }
 
 // Big integer modulo - proper arbitrary precision implementation
-DI_DEF di_int di_mod(di_int a, di_int b) {
+DI_IMPL di_int di_mod(di_int a, di_int b) {
     DI_ASSERT(a != NULL && "di_mod: dividend cannot be NULL");
     DI_ASSERT(b != NULL && "di_mod: divisor cannot be NULL");
     DI_ASSERT(!di_is_zero(b) && "di_mod: modulo by zero");
@@ -2045,7 +2047,7 @@ DI_DEF di_int di_mod(di_int a, di_int b) {
 }
 
 // Big integer absolute value
-DI_DEF di_int di_abs(di_int a) {
+DI_IMPL di_int di_abs(di_int a) {
     if (!a) return NULL;
     
     // If already positive or zero, just return a copy
@@ -2062,7 +2064,7 @@ DI_DEF di_int di_abs(di_int a) {
 }
 
 // Bitwise operations
-DI_DEF di_int di_and(di_int a, di_int b) {
+DI_IMPL di_int di_and(di_int a, di_int b) {
     if (!a || !b) return NULL;
     
     size_t max_limbs = (a->limb_count > b->limb_count) ? a->limb_count : b->limb_count;
@@ -2084,7 +2086,7 @@ DI_DEF di_int di_and(di_int a, di_int b) {
     return result;
 }
 
-DI_DEF di_int di_or(di_int a, di_int b) {
+DI_IMPL di_int di_or(di_int a, di_int b) {
     if (!a || !b) return NULL;
     
     size_t max_limbs = (a->limb_count > b->limb_count) ? a->limb_count : b->limb_count;
@@ -2106,7 +2108,7 @@ DI_DEF di_int di_or(di_int a, di_int b) {
     return result;
 }
 
-DI_DEF di_int di_xor(di_int a, di_int b) {
+DI_IMPL di_int di_xor(di_int a, di_int b) {
     if (!a || !b) return NULL;
     
     size_t max_limbs = (a->limb_count > b->limb_count) ? a->limb_count : b->limb_count;
@@ -2128,7 +2130,7 @@ DI_DEF di_int di_xor(di_int a, di_int b) {
     return result;
 }
 
-DI_DEF di_int di_not(di_int a) {
+DI_IMPL di_int di_not(di_int a) {
     if (!a) return NULL;
     
     // For simplicity, NOT operation on fixed width (one limb beyond significant bits)
@@ -2150,7 +2152,7 @@ DI_DEF di_int di_not(di_int a) {
     return result;
 }
 
-DI_DEF di_int di_shift_left(di_int a, size_t bits) {
+DI_IMPL di_int di_shift_left(di_int a, size_t bits) {
     if (!a || bits == 0) return di_copy(a);
     
     size_t limb_shift = bits / DI_LIMB_BITS;
@@ -2191,7 +2193,7 @@ DI_DEF di_int di_shift_left(di_int a, size_t bits) {
     return result;
 }
 
-DI_DEF di_int di_shift_right(di_int a, size_t bits) {
+DI_IMPL di_int di_shift_right(di_int a, size_t bits) {
     if (!a || bits == 0) return di_copy(a);
     
     size_t limb_shift = bits / DI_LIMB_BITS;
@@ -2230,7 +2232,7 @@ DI_DEF di_int di_shift_right(di_int a, size_t bits) {
 }
 
 // GCD using Euclidean algorithm
-DI_DEF di_int di_gcd(di_int a, di_int b) {
+DI_IMPL di_int di_gcd(di_int a, di_int b) {
     if (!a || !b) return NULL;
     
     di_int abs_a = di_abs(a);
@@ -2264,7 +2266,7 @@ DI_DEF di_int di_gcd(di_int a, di_int b) {
 }
 
 // LCM using the identity: lcm(a,b) = |a*b| / gcd(a,b)
-DI_DEF di_int di_lcm(di_int a, di_int b) {
+DI_IMPL di_int di_lcm(di_int a, di_int b) {
     if (!a || !b) return NULL;
     if (di_is_zero(a) || di_is_zero(b)) return di_zero();
     
@@ -2292,7 +2294,7 @@ DI_DEF di_int di_lcm(di_int a, di_int b) {
 }
 
 // Simple integer square root using Newton's method
-DI_DEF di_int di_sqrt(di_int n) {
+DI_IMPL di_int di_sqrt(di_int n) {
     if (!n) return NULL;
     if (di_is_negative(n)) return NULL; // Square root of negative number
     if (di_is_zero(n)) return di_zero();
@@ -2341,7 +2343,7 @@ DI_DEF di_int di_sqrt(di_int n) {
 }
 
 // Factorial function
-DI_DEF di_int di_factorial(uint32_t n) {
+DI_IMPL di_int di_factorial(uint32_t n) {
     if (n <= 1) return di_one();
     
     di_int result = di_one();
@@ -2367,7 +2369,7 @@ DI_DEF di_int di_factorial(uint32_t n) {
 
 // Modular exponentiation: (base^exp) mod mod
 // Uses binary exponentiation for efficiency
-DI_DEF di_int di_mod_pow(di_int base, di_int exp, di_int mod) {
+DI_IMPL di_int di_mod_pow(di_int base, di_int exp, di_int mod) {
     if (!base || !exp || !mod) return NULL;
     if (di_is_zero(mod)) return NULL; // Division by zero
     if (di_eq(mod, di_one())) return di_zero(); // x mod 1 = 0
@@ -2426,7 +2428,7 @@ DI_DEF di_int di_mod_pow(di_int base, di_int exp, di_int mod) {
 }
 
 // Simple primality test using trial division
-DI_DEF bool di_is_prime(di_int n, int certainty) {
+DI_IMPL bool di_is_prime(di_int n, int certainty) {
     (void)certainty; // Unused in this simple implementation
     
     if (!n) return false;
@@ -2490,7 +2492,7 @@ DI_DEF bool di_is_prime(di_int n, int certainty) {
 }
 
 // Find next prime number >= n
-DI_DEF di_int di_next_prime(di_int n) {
+DI_IMPL di_int di_next_prime(di_int n) {
     if (!n) return NULL;
     
     di_int candidate = di_copy(n);
@@ -2520,7 +2522,7 @@ DI_DEF di_int di_next_prime(di_int n) {
 // Simple random number generator (NOT cryptographically secure)
 // This is a placeholder implementation - real applications should use
 // a proper CSPRNG like /dev/urandom or Windows CryptoAPI
-DI_DEF di_int di_random(size_t bits) {
+DI_IMPL di_int di_random(size_t bits) {
     if (bits == 0) return di_zero();
     
     size_t limbs_needed = (bits + DI_LIMB_BITS - 1) / DI_LIMB_BITS;
@@ -2550,7 +2552,7 @@ DI_DEF di_int di_random(size_t bits) {
 }
 
 // Random number in range [min, max)
-DI_DEF di_int di_random_range(di_int min, di_int max) {
+DI_IMPL di_int di_random_range(di_int min, di_int max) {
     if (!min || !max) return NULL;
     if (di_ge(min, max)) return NULL;
     
@@ -2582,7 +2584,7 @@ DI_DEF di_int di_random_range(di_int min, di_int max) {
 }
 
 // Calculate bit length of an arbitrary precision integer
-DI_DEF size_t di_bit_length(di_int big) {
+DI_IMPL size_t di_bit_length(di_int big) {
     if (!big || big->limb_count == 0) return 0;
     
     // Find the most significant limb
@@ -2603,12 +2605,12 @@ DI_DEF size_t di_bit_length(di_int big) {
 }
 
 // Count of limbs used
-DI_DEF size_t di_limb_count(di_int big) {
+DI_IMPL size_t di_limb_count(di_int big) {
     return big ? big->limb_count : 0;
 }
 
 // Extended Euclidean Algorithm: finds gcd(a,b) and coefficients x,y such that ax + by = gcd(a,b)
-DI_DEF di_int di_extended_gcd(di_int a, di_int b, di_int* x, di_int* y) {
+DI_IMPL di_int di_extended_gcd(di_int a, di_int b, di_int* x, di_int* y) {
     if (!a || !b || !x || !y) return NULL;
     
     // Initialize
