@@ -14,6 +14,7 @@ A single-header C library implementing arbitrary precision integers with referen
 - **Configurable**: Customizable memory allocators and limb sizes
 - **MCU Friendly**: Designed for embedded systems
 - **Overflow Detection**: Helper functions to detect fixed-size arithmetic overflow
+- **Fail-Fast Error Handling**: Assertions on invalid inputs and allocation failures for immediate bug detection
 
 ## Quick Start
 
@@ -96,6 +97,12 @@ gcc -std=c11 -Wall -Wextra main.c -o tests
 - `di_add_i32()`, `di_mul_i32()` - Mixed-type arithmetic
 - `di_negate()`, `di_abs()` - Unary operations
 - `di_pow()` - Exponentiation
+
+### Predicate Functions
+
+- `di_is_zero()`, `di_is_one()` - Test for specific values
+- `di_is_positive()`, `di_is_negative()` - Sign testing
+- `di_eq()`, `di_lt()`, `di_gt()`, etc. - Comparisons
 
 ### Comparison and Conversion
 

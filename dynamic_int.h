@@ -2,7 +2,7 @@
  * @file dynamic_int.h
  * @brief Reference-counted arbitrary precision integer library
  * @version 1.1.0
- * @date August 2025
+ * @date September 2025
  *
  * Single header library for arbitrary precision integers with reference counting.
  * Designed for seamless integration with MCU projects that need automatic
@@ -630,10 +630,20 @@ DI_DEF bool di_is_negative(di_int big);
  * @param big Integer to test (may be NULL)
  * @return true if integer is positive, false otherwise
  * @since 1.0.0
- * 
+ *
  * @note NULL is considered zero (not positive)
  */
 DI_DEF bool di_is_positive(di_int big);
+
+/**
+ * @brief Test if integer equals one
+ * @param big Integer to test (may be NULL)
+ * @return true if integer equals 1, false otherwise
+ * @since 1.1.0
+ *
+ * @note NULL is considered zero (not one)
+ */
+DI_DEF bool di_is_one(di_int big);
 
 /** @} */ // end of comparison_operations
 
@@ -1013,25 +1023,22 @@ struct di_int_internal {
 };
 
 /* Internal function declarations */
-static bool di_resize_internal(struct di_int_internal* big, size_t new_capacity);
+static void di_resize_internal(struct di_int_internal* big, size_t new_capacity);
 
 /* Internal helper functions */
 
 static struct di_int_internal* di_alloc(size_t initial_capacity) {
     struct di_int_internal* big = (struct di_int_internal*)DI_MALLOC(sizeof(struct di_int_internal));
-    if (!big) return NULL;
-    
+    DI_ASSERT(big && "di_alloc: memory allocation failed");
+
     big->ref_count = 1;
     big->limb_count = 0;
     big->limb_capacity = initial_capacity;
     big->is_negative = false;
-    
+
     if (initial_capacity > 0) {
         big->limbs = (di_limb_t*)DI_MALLOC(sizeof(di_limb_t) * initial_capacity);
-        if (!big->limbs) {
-            DI_FREE(big);
-            return NULL;
-        }
+        DI_ASSERT(big->limbs && "di_alloc: limb array allocation failed");
         memset(big->limbs, 0, sizeof(di_limb_t) * initial_capacity);
     } else {
         big->limbs = NULL;
@@ -1054,22 +1061,22 @@ static void di_normalize(struct di_int_internal* big) {
 
 DI_DEF bool di_reserve(di_int big, size_t capacity) {
     if (!big) return false;
-    
-    return di_resize_internal(big, capacity);
+
+    di_resize_internal(big, capacity);
+    return true;
 }
 
-static bool di_resize_internal(struct di_int_internal* big, size_t new_capacity) {
-    if (new_capacity <= big->limb_capacity) return true;
-    
+static void di_resize_internal(struct di_int_internal* big, size_t new_capacity) {
+    if (new_capacity <= big->limb_capacity) return;
+
     di_limb_t* new_limbs = (di_limb_t*)DI_REALLOC(big->limbs, sizeof(di_limb_t) * new_capacity);
-    if (!new_limbs) return false;
-    
+    DI_ASSERT(new_limbs && "di_resize_internal: reallocation failed");
+
     // Zero out new limbs
     memset(new_limbs + big->limb_capacity, 0, sizeof(di_limb_t) * (new_capacity - big->limb_capacity));
-    
+
     big->limbs = new_limbs;
     big->limb_capacity = new_capacity;
-    return true;
 }
 
 /* Creation functions */
@@ -1155,10 +1162,9 @@ DI_DEF di_int di_one(void) {
 }
 
 DI_DEF di_int di_copy(di_int big) {
-    if (!big) return NULL;
-    
+    DI_ASSERT(big && "di_copy: operand cannot be NULL");
+
     struct di_int_internal* copy = di_alloc(big->limb_capacity);
-    if (!copy) return NULL;
     
     copy->limb_count = big->limb_count;
     copy->is_negative = big->is_negative;
@@ -1284,9 +1290,8 @@ DI_DEF di_int di_from_string(const char* str, int base) {
 /* Reference counting */
 
 DI_DEF di_int di_retain(di_int big) {
-    if (big) {
-        big->ref_count++;
-    }
+    DI_ASSERT(big && "di_retain: operand cannot be NULL");
+    big->ref_count++;
     return big;
 }
 
@@ -1310,7 +1315,8 @@ DI_DEF size_t di_ref_count(di_int big) {
 /* Comparison functions */
 
 DI_DEF int di_compare(di_int a, di_int b) {
-    if (!a || !b) return 0;
+    DI_ASSERT(a && "di_compare: first operand cannot be NULL");
+    DI_ASSERT(b && "di_compare: second operand cannot be NULL");
     
     // Compare signs
     if (a->is_negative != b->is_negative) {
@@ -1357,21 +1363,33 @@ DI_DEF bool di_ge(di_int a, di_int b) {
 }
 
 DI_DEF bool di_is_zero(di_int big) {
-    return big && big->limb_count == 0;
+    DI_ASSERT(big && "di_is_zero: operand cannot be NULL");
+    return big->limb_count == 0;
 }
 
 DI_DEF bool di_is_negative(di_int big) {
-    return big && big->is_negative && big->limb_count > 0;
+    DI_ASSERT(big && "di_is_negative: operand cannot be NULL");
+    return big->is_negative && big->limb_count > 0;
 }
 
 DI_DEF bool di_is_positive(di_int big) {
-    return big && !big->is_negative && big->limb_count > 0;
+    DI_ASSERT(big && "di_is_positive: operand cannot be NULL");
+    return !big->is_negative && big->limb_count > 0;
+}
+
+DI_DEF bool di_is_one(di_int big) {
+    DI_ASSERT(big && "di_is_one: operand cannot be NULL");
+    if (big->is_negative || big->limb_count != 1) {
+        return false;
+    }
+    return big->limbs[0] == 1;
 }
 
 /* Conversion functions */
 
 DI_DEF bool di_to_int32(di_int big, int32_t* result) {
-    if (!big || !result) return false;
+    DI_ASSERT(big && "di_to_int32: integer cannot be NULL");
+    DI_ASSERT(result && "di_to_int32: result pointer cannot be NULL");
     
     if (big->limb_count == 0) {
         *result = 0;
@@ -1642,10 +1660,9 @@ DI_DEF char* di_to_string(di_int big, int base) {
     
     if (big->limb_count == 0) {
         char* str = (char*)DI_MALLOC(2);
-        if (str) {
-            str[0] = '0';
-            str[1] = '\0';
-        }
+        DI_ASSERT(str && "di_to_string: allocation failed for zero string");
+        str[0] = '0';
+        str[1] = '\0';
         return str;
     }
     
@@ -1654,21 +1671,13 @@ DI_DEF char* di_to_string(di_int big, int base) {
         // Proper arbitrary precision decimal conversion using efficient modular arithmetic
         size_t max_digits = big->limb_count * 10 + 10;
         char* buffer = (char*)DI_MALLOC(max_digits);
-        if (!buffer) return NULL;
+        DI_ASSERT(buffer && "di_to_string: buffer allocation failed");
         
         // Make a working copy
         di_int work = di_copy(big);
-        if (!work) {
-            DI_FREE(buffer);
-            return NULL;
-        }
-        
+
         char* digits = (char*)DI_MALLOC(max_digits);
-        if (!digits) {
-            DI_FREE(buffer);
-            di_release(&work);
-            return NULL;
-        }
+        DI_ASSERT(digits && "di_to_string: digits allocation failed");
         
         size_t digit_count = 0;
         
