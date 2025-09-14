@@ -1062,7 +1062,7 @@ static void di_normalize(struct di_int_internal* big) {
 }
 
 DI_IMPL bool di_reserve(di_int big, size_t capacity) {
-    if (!big) return false;
+    DI_ASSERT(big && "di_reserve: operand cannot be NULL");
 
     di_resize_internal(big, capacity);
     return true;
@@ -1085,7 +1085,7 @@ static void di_resize_internal(struct di_int_internal* big, size_t new_capacity)
 
 DI_IMPL di_int di_from_int32(int32_t value) {
     struct di_int_internal* big = di_alloc(1);
-    if (!big) return NULL;
+    DI_ASSERT(big && "di_from_int32: allocation failed");
     
     if (value < 0) {
         big->is_negative = true;
@@ -1105,7 +1105,7 @@ DI_IMPL di_int di_from_int32(int32_t value) {
 
 DI_IMPL di_int di_from_int64(int64_t value) {
     struct di_int_internal* big = di_alloc(2);
-    if (!big) return NULL;
+    DI_ASSERT(big && "di_from_int64: allocation failed");
     
     if (value < 0) {
         big->is_negative = true;
@@ -1133,7 +1133,7 @@ DI_IMPL di_int di_from_int64(int64_t value) {
 
 DI_IMPL di_int di_from_uint32(uint32_t value) {
     struct di_int_internal* big = di_alloc(1);
-    if (!big) return NULL;
+    DI_ASSERT(big && "di_from_uint32: allocation failed");
     
     big->limbs[0] = value;
     big->limb_count = (value != 0) ? 1 : 0;
@@ -1144,7 +1144,7 @@ DI_IMPL di_int di_from_uint32(uint32_t value) {
 
 DI_IMPL di_int di_from_uint64(uint64_t value) {
     struct di_int_internal* big = di_alloc(2);
-    if (!big) return NULL;
+    DI_ASSERT(big && "di_from_uint64: allocation failed");
     
     big->limbs[0] = (di_limb_t)(value & DI_LIMB_MAX);
     big->limbs[1] = (di_limb_t)(value >> DI_LIMB_BITS);
@@ -1178,11 +1178,12 @@ DI_IMPL di_int di_copy(di_int big) {
 }
 
 DI_IMPL di_int di_from_string(const char* str, int base) {
-    if (!str || base < 2 || base > 36) return NULL;
+    DI_ASSERT(str && "di_from_string: string cannot be NULL");
+    DI_ASSERT(base >= 2 && base <= 36 && "di_from_string: invalid base");
     
     // Skip whitespace
     while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r') str++;
-    if (*str == '\0') return NULL;
+    DI_ASSERT(*str != '\0' && "di_from_string: empty string");
     
     // Check for sign
     bool is_negative = false;
@@ -1226,14 +1227,11 @@ DI_IMPL di_int di_from_string(const char* str, int base) {
     if (capacity < 1) capacity = 1;
     
     struct di_int_internal* result = di_alloc(capacity);
-    if (!result) return NULL;
+    DI_ASSERT(result && "di_from_string: allocation failed");
     
     // Convert digit by digit using Horner's method: result = result * base + digit
     di_int base_big = di_from_int32(base);
-    if (!base_big) {
-        di_release((di_int*)&result);
-        return NULL;
-    }
+    DI_ASSERT(base_big && "di_from_string: base allocation failed");
     
     p = str;
     for (size_t i = 0; i < digit_count; i++) {
@@ -1251,29 +1249,16 @@ DI_IMPL di_int di_from_string(const char* str, int base) {
         
         // result = result * base + digit
         di_int temp = di_mul(result, base_big);
-        if (!temp) {
-            di_release(&base_big);
-            di_release((di_int*)&result);
-            return NULL;
-        }
+        DI_ASSERT(temp && "di_from_string: multiplication allocation failed");
         
         di_int digit_big = di_from_int32(digit_val);
-        if (!digit_big) {
-            di_release(&temp);
-            di_release(&base_big);
-            di_release((di_int*)&result);
-            return NULL;
-        }
+        DI_ASSERT(digit_big && "di_from_string: digit allocation failed");
         
         di_int new_result = di_add(temp, digit_big);
         di_release(&temp);
         di_release(&digit_big);
         
-        if (!new_result) {
-            di_release(&base_big);
-            di_release((di_int*)&result);
-            return NULL;
-        }
+        DI_ASSERT(new_result && "di_from_string: addition allocation failed");
         
         di_release((di_int*)&result);
         result = new_result;
@@ -1311,7 +1296,8 @@ DI_IMPL void di_release(di_int* big) {
 }
 
 DI_IMPL size_t di_ref_count(di_int big) {
-    return big ? big->ref_count : 0;
+    DI_ASSERT(big && "di_ref_count: operand cannot be NULL");
+    return big->ref_count;
 }
 
 /* Comparison functions */
@@ -1418,7 +1404,8 @@ DI_IMPL bool di_to_int32(di_int big, int32_t* result) {
 }
 
 DI_IMPL bool di_to_int64(di_int big, int64_t* result) {
-    if (!big || !result) return false;
+    DI_ASSERT(big && "di_to_int64: integer cannot be NULL");
+    DI_ASSERT(result && "di_to_int64: result pointer cannot be NULL");
     
     if (big->limb_count == 0) {
         *result = 0;
@@ -1448,7 +1435,8 @@ DI_IMPL bool di_to_int64(di_int big, int64_t* result) {
 }
 
 DI_IMPL bool di_to_uint32(di_int big, uint32_t* result) {
-    if (!big || !result) return false;
+    DI_ASSERT(big && "di_to_uint32: integer cannot be NULL");
+    DI_ASSERT(result && "di_to_uint32: result pointer cannot be NULL");
     
     if (big->limb_count == 0) {
         *result = 0;
@@ -1477,7 +1465,8 @@ DI_IMPL bool di_to_uint32(di_int big, uint32_t* result) {
 }
 
 DI_IMPL bool di_to_uint64(di_int big, uint64_t* result) {
-    if (!big || !result) return false;
+    DI_ASSERT(big && "di_to_uint64: integer cannot be NULL");
+    DI_ASSERT(result && "di_to_uint64: result pointer cannot be NULL");
     
     if (big->limb_count == 0) {
         *result = 0;
@@ -1500,7 +1489,8 @@ DI_IMPL bool di_to_uint64(di_int big, uint64_t* result) {
 }
 
 DI_IMPL double di_to_double(di_int big) {
-    if (!big || big->limb_count == 0) return 0.0;
+    DI_ASSERT(big && "di_to_double: operand cannot be NULL");
+    if (big->limb_count == 0) return 0.0;
     
     double result = 0.0;
     double base = 1.0;
@@ -1539,7 +1529,7 @@ DI_IMPL di_int di_add(di_int a, di_int b) {
         struct di_int_internal* result = di_alloc(
             (a->limb_count > b->limb_count ? a->limb_count : b->limb_count) + 1
         );
-        if (!result) return NULL;
+        DI_ASSERT(result && "di_add: allocation failed");
         
         result->is_negative = a->is_negative;
         
@@ -1580,7 +1570,7 @@ DI_IMPL di_int di_add(di_int a, di_int b) {
     
     // Subtract smaller magnitude from larger magnitude
     struct di_int_internal* result = di_alloc(larger->limb_count);
-    if (!result) return NULL;
+    DI_ASSERT(result && "di_sub: allocation failed");
     
     result->is_negative = result_negative;
     result->limb_count = larger->limb_count;
@@ -1610,11 +1600,11 @@ DI_IMPL di_int di_add(di_int a, di_int b) {
 }
 
 DI_IMPL di_int di_add_i32(di_int a, int32_t b) {
-    if (!a) return NULL;
+    DI_ASSERT(a && "di_add_i32: operand cannot be NULL");
     
     // Convert int32 to big integer and use regular addition
     di_int b_big = di_from_int32(b);
-    if (!b_big) return NULL;
+    DI_ASSERT(b_big && "di_add_i32: allocation failed");
     
     di_int result = di_add(a, b_big);
     di_release(&b_big);
@@ -1627,7 +1617,7 @@ DI_IMPL di_int di_sub(di_int a, di_int b) {
     
     // a - b = a + (-b)
     di_int neg_b = di_negate(b);
-    if (!neg_b) return NULL;
+    DI_ASSERT(neg_b && "di_sub: allocation failed");
     
     di_int result = di_add(a, neg_b);
     di_release(&neg_b);
@@ -1635,11 +1625,11 @@ DI_IMPL di_int di_sub(di_int a, di_int b) {
 }
 
 DI_IMPL di_int di_sub_i32(di_int a, int32_t b) {
-    if (!a) return NULL;
+    DI_ASSERT(a && "di_sub_i32: operand cannot be NULL");
     
     // Convert int32 to big integer and use regular subtraction
     di_int b_big = di_from_int32(b);
-    if (!b_big) return NULL;
+    DI_ASSERT(b_big && "di_sub_i32: allocation failed");
     
     di_int result = di_sub(a, b_big);
     di_release(&b_big);
@@ -1647,7 +1637,7 @@ DI_IMPL di_int di_sub_i32(di_int a, int32_t b) {
 }
 
 DI_IMPL di_int di_negate(di_int a) {
-    if (!a) return NULL;
+    DI_ASSERT(a && "di_negate: operand cannot be NULL");
     
     di_int result = di_copy(a);
     if (result && result->limb_count > 0) {
@@ -1658,7 +1648,8 @@ DI_IMPL di_int di_negate(di_int a) {
 
 /* String conversion implementation */
 DI_IMPL char* di_to_string(di_int big, int base) {
-    if (!big || base < 2 || base > 36) return NULL;
+    DI_ASSERT(big && "di_to_string: operand cannot be NULL");
+    DI_ASSERT(base >= 2 && base <= 36 && "di_to_string: invalid base");
     
     if (big->limb_count == 0) {
         char* str = (char*)DI_MALLOC(2);
@@ -1734,6 +1725,7 @@ DI_IMPL char* di_to_string(di_int big, int base) {
 /* Overflow detection helpers */
 
 DI_IMPL bool di_add_overflow_int32(int32_t a, int32_t b, int32_t* result) {
+    DI_ASSERT(result && "di_add_overflow_int32: result pointer cannot be NULL");
     int64_t sum = (int64_t)a + (int64_t)b;
     if (sum < INT32_MIN || sum > INT32_MAX) {
         return false;  // Overflow
@@ -1743,6 +1735,7 @@ DI_IMPL bool di_add_overflow_int32(int32_t a, int32_t b, int32_t* result) {
 }
 
 DI_IMPL bool di_subtract_overflow_int32(int32_t a, int32_t b, int32_t* result) {
+    DI_ASSERT(result && "di_subtract_overflow_int32: result pointer cannot be NULL");
     int64_t diff = (int64_t)a - (int64_t)b;
     if (diff < INT32_MIN || diff > INT32_MAX) {
         return false;  // Overflow
@@ -1752,6 +1745,7 @@ DI_IMPL bool di_subtract_overflow_int32(int32_t a, int32_t b, int32_t* result) {
 }
 
 DI_IMPL bool di_multiply_overflow_int32(int32_t a, int32_t b, int32_t* result) {
+    DI_ASSERT(result && "di_multiply_overflow_int32: result pointer cannot be NULL");
     int64_t prod = (int64_t)a * (int64_t)b;
     if (prod < INT32_MIN || prod > INT32_MAX) {
         return false;  // Overflow
@@ -1761,6 +1755,7 @@ DI_IMPL bool di_multiply_overflow_int32(int32_t a, int32_t b, int32_t* result) {
 }
 
 DI_IMPL bool di_add_overflow_int64(int64_t a, int64_t b, int64_t* result) {
+    DI_ASSERT(result && "di_add_overflow_int64: result pointer cannot be NULL");
     // Check for overflow without causing UB
     if (b > 0 && a > INT64_MAX - b) return false;
     if (b < 0 && a < INT64_MIN - b) return false;
@@ -1769,6 +1764,7 @@ DI_IMPL bool di_add_overflow_int64(int64_t a, int64_t b, int64_t* result) {
 }
 
 DI_IMPL bool di_subtract_overflow_int64(int64_t a, int64_t b, int64_t* result) {
+    DI_ASSERT(result && "di_subtract_overflow_int64: result pointer cannot be NULL");
     // Check for overflow without causing UB
     if (b < 0 && a > INT64_MAX + b) return false;
     if (b > 0 && a < INT64_MIN + b) return false;
@@ -1777,6 +1773,7 @@ DI_IMPL bool di_subtract_overflow_int64(int64_t a, int64_t b, int64_t* result) {
 }
 
 DI_IMPL bool di_multiply_overflow_int64(int64_t a, int64_t b, int64_t* result) {
+    DI_ASSERT(result && "di_multiply_overflow_int64: result pointer cannot be NULL");
     // Check for overflow - this is complex for 64-bit
     if (a == 0 || b == 0) {
         *result = 0;
@@ -1827,7 +1824,7 @@ DI_IMPL di_int di_mul(di_int a, di_int b) {
         } else {
             // Result needs two limbs
             struct di_int_internal* result = di_alloc(2);
-            if (!result) return NULL;
+            DI_ASSERT(result && "di_mul: allocation failed");
             
             result->is_negative = result_negative;
             result->limb_count = 2;
@@ -1843,7 +1840,7 @@ DI_IMPL di_int di_mul(di_int a, di_int b) {
     bool result_negative = (a->is_negative != b->is_negative);
     size_t result_capacity = a->limb_count + b->limb_count;
     struct di_int_internal* result = di_alloc(result_capacity);
-    if (!result) return NULL;
+    DI_ASSERT(result && "di_mul: allocation failed");
     
     result->is_negative = result_negative;
     result->limb_count = result_capacity;
@@ -1878,7 +1875,7 @@ DI_IMPL di_int di_mul(di_int a, di_int b) {
 
 // Big integer multiplication by int32
 DI_IMPL di_int di_mul_i32(di_int a, int32_t b) {
-    if (!a) return NULL;
+    DI_ASSERT(a && "di_mul_i32: operand cannot be NULL");
     
     di_int b_big = di_from_int32(b);
     di_int result = di_mul(a, b_big);
@@ -2048,7 +2045,7 @@ DI_IMPL di_int di_mod(di_int a, di_int b) {
 
 // Big integer absolute value
 DI_IMPL di_int di_abs(di_int a) {
-    if (!a) return NULL;
+    DI_ASSERT(a && "di_abs: operand cannot be NULL");
     
     // If already positive or zero, just return a copy
     if (!a->is_negative) {
@@ -2065,11 +2062,12 @@ DI_IMPL di_int di_abs(di_int a) {
 
 // Bitwise operations
 DI_IMPL di_int di_and(di_int a, di_int b) {
-    if (!a || !b) return NULL;
+    DI_ASSERT(a && "di_and: first operand cannot be NULL");
+    DI_ASSERT(b && "di_and: second operand cannot be NULL");
     
     size_t max_limbs = (a->limb_count > b->limb_count) ? a->limb_count : b->limb_count;
     struct di_int_internal* result = di_alloc(max_limbs);
-    if (!result) return NULL;
+    DI_ASSERT(result && "allocation failed");
     
     // AND operation on limbs
     for (size_t i = 0; i < max_limbs; i++) {
@@ -2087,11 +2085,12 @@ DI_IMPL di_int di_and(di_int a, di_int b) {
 }
 
 DI_IMPL di_int di_or(di_int a, di_int b) {
-    if (!a || !b) return NULL;
+    DI_ASSERT(a && "di_or: first operand cannot be NULL");
+    DI_ASSERT(b && "di_or: second operand cannot be NULL");
     
     size_t max_limbs = (a->limb_count > b->limb_count) ? a->limb_count : b->limb_count;
     struct di_int_internal* result = di_alloc(max_limbs);
-    if (!result) return NULL;
+    DI_ASSERT(result && "allocation failed");
     
     // OR operation on limbs
     for (size_t i = 0; i < max_limbs; i++) {
@@ -2109,11 +2108,12 @@ DI_IMPL di_int di_or(di_int a, di_int b) {
 }
 
 DI_IMPL di_int di_xor(di_int a, di_int b) {
-    if (!a || !b) return NULL;
+    DI_ASSERT(a && "di_xor: first operand cannot be NULL");
+    DI_ASSERT(b && "di_xor: second operand cannot be NULL");
     
     size_t max_limbs = (a->limb_count > b->limb_count) ? a->limb_count : b->limb_count;
     struct di_int_internal* result = di_alloc(max_limbs);
-    if (!result) return NULL;
+    DI_ASSERT(result && "allocation failed");
     
     // XOR operation on limbs
     for (size_t i = 0; i < max_limbs; i++) {
@@ -2131,12 +2131,12 @@ DI_IMPL di_int di_xor(di_int a, di_int b) {
 }
 
 DI_IMPL di_int di_not(di_int a) {
-    if (!a) return NULL;
+    DI_ASSERT(a && "di_not: operand cannot be NULL");
     
     // For simplicity, NOT operation on fixed width (one limb beyond significant bits)
     size_t result_limbs = a->limb_count + 1;
     struct di_int_internal* result = di_alloc(result_limbs);
-    if (!result) return NULL;
+    DI_ASSERT(result && "di_not: allocation failed");
     
     // NOT operation on limbs
     for (size_t i = 0; i < a->limb_count; i++) {
@@ -2153,14 +2153,15 @@ DI_IMPL di_int di_not(di_int a) {
 }
 
 DI_IMPL di_int di_shift_left(di_int a, size_t bits) {
-    if (!a || bits == 0) return di_copy(a);
+    DI_ASSERT(a && "di_shift_left: operand cannot be NULL");
+    if (bits == 0) return di_copy(a);
     
     size_t limb_shift = bits / DI_LIMB_BITS;
     size_t bit_shift = bits % DI_LIMB_BITS;
     
     size_t new_limb_count = a->limb_count + limb_shift + (bit_shift > 0 ? 1 : 0);
     struct di_int_internal* result = di_alloc(new_limb_count);
-    if (!result) return NULL;
+    DI_ASSERT(result && "allocation failed");
     
     // Clear the result limbs
     for (size_t i = 0; i < new_limb_count; i++) {
@@ -2194,7 +2195,8 @@ DI_IMPL di_int di_shift_left(di_int a, size_t bits) {
 }
 
 DI_IMPL di_int di_shift_right(di_int a, size_t bits) {
-    if (!a || bits == 0) return di_copy(a);
+    DI_ASSERT(a && "di_shift_right: operand cannot be NULL");
+    if (bits == 0) return di_copy(a);
     
     size_t limb_shift = bits / DI_LIMB_BITS;
     size_t bit_shift = bits % DI_LIMB_BITS;
@@ -2206,7 +2208,7 @@ DI_IMPL di_int di_shift_right(di_int a, size_t bits) {
     
     size_t new_limb_count = a->limb_count - limb_shift;
     struct di_int_internal* result = di_alloc(new_limb_count);
-    if (!result) return NULL;
+    DI_ASSERT(result && "allocation failed");
     
     if (bit_shift == 0) {
         // Simple limb shift
@@ -2233,7 +2235,8 @@ DI_IMPL di_int di_shift_right(di_int a, size_t bits) {
 
 // GCD using Euclidean algorithm
 DI_IMPL di_int di_gcd(di_int a, di_int b) {
-    if (!a || !b) return NULL;
+    DI_ASSERT(a && "di_gcd: first operand cannot be NULL");
+    DI_ASSERT(b && "di_gcd: second operand cannot be NULL");
     
     di_int abs_a = di_abs(a);
     di_int abs_b = di_abs(b);
@@ -2267,11 +2270,12 @@ DI_IMPL di_int di_gcd(di_int a, di_int b) {
 
 // LCM using the identity: lcm(a,b) = |a*b| / gcd(a,b)
 DI_IMPL di_int di_lcm(di_int a, di_int b) {
-    if (!a || !b) return NULL;
+    DI_ASSERT(a && "di_lcm: first operand cannot be NULL");
+    DI_ASSERT(b && "di_lcm: second operand cannot be NULL");
     if (di_is_zero(a) || di_is_zero(b)) return di_zero();
     
     di_int gcd = di_gcd(a, b);
-    if (!gcd) return NULL;
+    DI_ASSERT(gcd && "di_lcm: gcd allocation failed");
     
     di_int product = di_mul(a, b);
     if (!product) {
@@ -2295,8 +2299,8 @@ DI_IMPL di_int di_lcm(di_int a, di_int b) {
 
 // Simple integer square root using Newton's method
 DI_IMPL di_int di_sqrt(di_int n) {
-    if (!n) return NULL;
-    if (di_is_negative(n)) return NULL; // Square root of negative number
+    DI_ASSERT(n && "di_sqrt: operand cannot be NULL");
+    DI_ASSERT(!di_is_negative(n) && "di_sqrt: square root of negative number");
     if (di_is_zero(n)) return di_zero();
     
     di_int one = di_one();
@@ -2347,7 +2351,7 @@ DI_IMPL di_int di_factorial(uint32_t n) {
     if (n <= 1) return di_one();
     
     di_int result = di_one();
-    if (!result) return NULL;
+    DI_ASSERT(result && "di_factorial: allocation failed");
     
     for (uint32_t i = 2; i <= n; i++) {
         di_int i_big = di_from_uint32(i);
@@ -2359,8 +2363,8 @@ DI_IMPL di_int di_factorial(uint32_t n) {
         di_int new_result = di_mul(result, i_big);
         di_release(&i_big);
         di_release(&result);
-        
-        if (!new_result) return NULL;
+
+        DI_ASSERT(new_result && "di_factorial: allocation failed");
         result = new_result;
     }
     
@@ -2370,8 +2374,10 @@ DI_IMPL di_int di_factorial(uint32_t n) {
 // Modular exponentiation: (base^exp) mod mod
 // Uses binary exponentiation for efficiency
 DI_IMPL di_int di_mod_pow(di_int base, di_int exp, di_int mod) {
-    if (!base || !exp || !mod) return NULL;
-    if (di_is_zero(mod)) return NULL; // Division by zero
+    DI_ASSERT(base && "di_mod_pow: base cannot be NULL");
+    DI_ASSERT(exp && "di_mod_pow: exponent cannot be NULL");
+    DI_ASSERT(mod && "di_mod_pow: modulus cannot be NULL");
+    DI_ASSERT(!di_is_zero(mod) && "di_mod_pow: modulus cannot be zero");
     if (di_eq(mod, di_one())) return di_zero(); // x mod 1 = 0
     
     if (di_is_zero(exp)) return di_one(); // base^0 = 1
@@ -2430,8 +2436,8 @@ DI_IMPL di_int di_mod_pow(di_int base, di_int exp, di_int mod) {
 // Simple primality test using trial division
 DI_IMPL bool di_is_prime(di_int n, int certainty) {
     (void)certainty; // Unused in this simple implementation
-    
-    if (!n) return false;
+
+    DI_ASSERT(n && "di_is_prime: operand cannot be NULL");
     if (di_is_negative(n)) return false;
     
     // Handle small cases
@@ -2493,10 +2499,10 @@ DI_IMPL bool di_is_prime(di_int n, int certainty) {
 
 // Find next prime number >= n
 DI_IMPL di_int di_next_prime(di_int n) {
-    if (!n) return NULL;
+    DI_ASSERT(n && "di_next_prime: operand cannot be NULL");
     
     di_int candidate = di_copy(n);
-    if (!candidate) return NULL;
+    DI_ASSERT(candidate && "di_next_prime: allocation failed");
     
     // If n is even, make it odd
     di_int two = di_from_int32(2);
@@ -2527,7 +2533,7 @@ DI_IMPL di_int di_random(size_t bits) {
     
     size_t limbs_needed = (bits + DI_LIMB_BITS - 1) / DI_LIMB_BITS;
     struct di_int_internal* result = di_alloc(limbs_needed);
-    if (!result) return NULL;
+    DI_ASSERT(result && "di_random: allocation failed");
     
     // Use simple rand() - NOT suitable for cryptographic use
     for (size_t i = 0; i < limbs_needed; i++) {
@@ -2553,11 +2559,12 @@ DI_IMPL di_int di_random(size_t bits) {
 
 // Random number in range [min, max)
 DI_IMPL di_int di_random_range(di_int min, di_int max) {
-    if (!min || !max) return NULL;
-    if (di_ge(min, max)) return NULL;
+    DI_ASSERT(min && "di_random_range: min cannot be NULL");
+    DI_ASSERT(max && "di_random_range: max cannot be NULL");
+    DI_ASSERT(di_lt(min, max) && "di_random_range: min must be less than max");
     
     di_int range = di_sub(max, min);
-    if (!range) return NULL;
+    DI_ASSERT(range && "di_random_range: allocation failed");
     
     // Get bit length of range to generate appropriate random number
     size_t range_bits = di_bit_length(range);
@@ -2585,7 +2592,8 @@ DI_IMPL di_int di_random_range(di_int min, di_int max) {
 
 // Calculate bit length of an arbitrary precision integer
 DI_IMPL size_t di_bit_length(di_int big) {
-    if (!big || big->limb_count == 0) return 0;
+    DI_ASSERT(big && "di_bit_length: operand cannot be NULL");
+    if (big->limb_count == 0) return 0;
     
     // Find the most significant limb
     size_t high_limb_idx = big->limb_count - 1;
@@ -2606,12 +2614,16 @@ DI_IMPL size_t di_bit_length(di_int big) {
 
 // Count of limbs used
 DI_IMPL size_t di_limb_count(di_int big) {
-    return big ? big->limb_count : 0;
+    DI_ASSERT(big && "di_limb_count: operand cannot be NULL");
+    return big->limb_count;
 }
 
 // Extended Euclidean Algorithm: finds gcd(a,b) and coefficients x,y such that ax + by = gcd(a,b)
 DI_IMPL di_int di_extended_gcd(di_int a, di_int b, di_int* x, di_int* y) {
-    if (!a || !b || !x || !y) return NULL;
+    DI_ASSERT(a && "di_extended_gcd: first operand cannot be NULL");
+    DI_ASSERT(b && "di_extended_gcd: second operand cannot be NULL");
+    DI_ASSERT(x && "di_extended_gcd: x pointer cannot be NULL");
+    DI_ASSERT(y && "di_extended_gcd: y pointer cannot be NULL");
     
     // Initialize
     di_int old_r = di_abs(a);

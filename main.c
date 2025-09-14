@@ -113,11 +113,7 @@ void test_to_uint32_overflow_fails(void) {
     di_release(&a);
 }
 
-void test_to_uint32_null_fails(void) {
-    uint32_t result;
-    TEST_ASSERT_FALSE(di_to_uint32(NULL, &result));
-    TEST_ASSERT_FALSE(di_to_uint32(di_from_int32(42), NULL));
-}
+// NULL handling tests removed - fail-fast policy means NULL parameters trigger assertions
 
 void test_to_uint64_basic(void) {
     di_int a = di_from_int32(123);
@@ -159,11 +155,7 @@ void test_to_uint64_negative_fails(void) {
     di_release(&a);
 }
 
-void test_to_uint64_null_fails(void) {
-    uint64_t result;
-    TEST_ASSERT_FALSE(di_to_uint64(NULL, &result));
-    TEST_ASSERT_FALSE(di_to_uint64(di_from_int32(42), NULL));
-}
+// NULL handling tests removed - fail-fast policy means NULL parameters trigger assertions
 
 // Reference counting tests
 void test_reference_counting(void) {
@@ -1503,13 +1495,13 @@ int main(void) {
     RUN_TEST(test_to_uint32_max);
     RUN_TEST(test_to_uint32_negative_fails);
     RUN_TEST(test_to_uint32_overflow_fails);
-    RUN_TEST(test_to_uint32_null_fails);
+    // RUN_TEST(test_to_uint32_null_fails); // Removed - NULL handling now triggers assertions
     RUN_TEST(test_to_uint64_basic);
     RUN_TEST(test_to_uint64_zero);
     RUN_TEST(test_to_uint64_max_uint32);
     RUN_TEST(test_to_uint64_large_value);
     RUN_TEST(test_to_uint64_negative_fails);
-    RUN_TEST(test_to_uint64_null_fails);
+    // RUN_TEST(test_to_uint64_null_fails); // Removed - NULL handling now triggers assertions
     
     // Reference counting tests
     RUN_TEST(test_reference_counting);
